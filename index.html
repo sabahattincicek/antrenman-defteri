@@ -63,6 +63,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .rows .n{font-family:var(--display);font-weight:700;font-size:18px;color:var(--muted);text-align:center}
 .rows input{width:100%;min-width:0;height:46px;border:1px solid var(--line);border-radius:10px;background:var(--sunk);color:var(--fg);font:500 18px var(--body);text-align:center;font-variant-numeric:tabular-nums}
 .rows input.filled{border-color:var(--ok)}
+.rows input.oto{color:var(--muted);border-style:dashed;opacity:.6}
 .foot{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .mvs{display:flex;gap:6px}
 .mv{width:44px;height:40px;border:1px solid var(--line);background:var(--sunk);border-radius:10px;font-size:18px;line-height:1}
@@ -125,36 +126,36 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 <script>
 const DEFAULT_PROGRAM = {gunler:[
   {id:"pzt",gun:"Pzt",baslik:"İtiş",hareketler:[
-    {ad:"Chest press makinesi",kas:["Göğüs","Ön omuz","Triceps"],set:3,tekrar:"8-12"},
-    {ad:"Incline press (makine veya Smith)",kas:["Üst göğüs","Ön omuz","Triceps"],set:3,tekrar:"8-12"},
-    {ad:"Shoulder press makinesi",kas:["Ön omuz","Yan omuz","Triceps"],set:3,tekrar:"8-12"},
-    {ad:"Lateral raise (makine veya kablo)",kas:["Yan omuz"],set:3,tekrar:"8-12"},
-    {ad:"Triceps pushdown (kablo)",kas:["Triceps"],set:3,tekrar:"8-12"}]},
+    {ad:"Chest press makinesi",kas:["Pectoralis major","Anterior deltoid","Triceps brachii"],set:3,tekrar:"8-12"},
+    {ad:"Incline press (makine veya Smith)",kas:["Pectoralis major (clavicular)","Anterior deltoid","Triceps brachii"],set:3,tekrar:"8-12"},
+    {ad:"Shoulder press makinesi",kas:["Anterior deltoid","Lateral deltoid","Triceps brachii"],set:3,tekrar:"8-12"},
+    {ad:"Lateral raise (makine veya kablo)",kas:["Lateral deltoid"],set:3,tekrar:"8-12"},
+    {ad:"Triceps pushdown (kablo)",kas:["Triceps brachii"],set:3,tekrar:"8-12"}]},
   {id:"sal",gun:"Sal",baslik:"Çekiş",hareketler:[
-    {ad:"Lat pulldown",kas:["Kanat","Biceps"],set:3,tekrar:"8-12"},
-    {ad:"Göğüs destekli row makinesi",kas:["Orta sırt","Kanat","Biceps"],set:3,tekrar:"8-12"},
-    {ad:"Seated cable row",kas:["Orta sırt","Kanat","Biceps"],set:3,tekrar:"8-12"},
-    {ad:"Reverse pec deck (arka omuz)",kas:["Arka omuz","Orta sırt"],set:3,tekrar:"8-12"},
-    {ad:"Biceps curl (kablo veya makine)",kas:["Biceps","Ön kol"],set:3,tekrar:"8-12"}]},
+    {ad:"Lat pulldown",kas:["Latissimus dorsi","Biceps brachii"],set:3,tekrar:"8-12"},
+    {ad:"Göğüs destekli row makinesi",kas:["Rhomboids","Latissimus dorsi","Biceps brachii"],set:3,tekrar:"8-12"},
+    {ad:"Seated cable row",kas:["Rhomboids","Latissimus dorsi","Biceps brachii"],set:3,tekrar:"8-12"},
+    {ad:"Reverse pec deck (arka omuz)",kas:["Posterior deltoid","Rhomboids"],set:3,tekrar:"8-12"},
+    {ad:"Biceps curl (kablo veya makine)",kas:["Biceps brachii","Brachioradialis"],set:3,tekrar:"8-12"}]},
   {id:"car",gun:"Çar",baslik:"Bacak",hareketler:[
-    {ad:"Leg press",kas:["Ön bacak","Kalça"],set:3,tekrar:"8-12"},
-    {ad:"Leg extension",kas:["Ön bacak"],set:3,tekrar:"8-12"},
-    {ad:"Leg curl",kas:["Arka bacak"],set:3,tekrar:"8-12"},
-    {ad:"Calf raise",kas:["Baldır"],set:3,tekrar:"8-12"},
-    {ad:"Plank",kas:["Karın","Bel"],set:3,tekrar:"30-45",birim:"sn"}]},
+    {ad:"Leg press",kas:["Quadriceps","Gluteus maximus"],set:3,tekrar:"8-12"},
+    {ad:"Leg extension",kas:["Quadriceps"],set:3,tekrar:"8-12"},
+    {ad:"Leg curl",kas:["Hamstrings"],set:3,tekrar:"8-12"},
+    {ad:"Calf raise",kas:["Gastrocnemius"],set:3,tekrar:"8-12"},
+    {ad:"Plank",kas:["Rectus abdominis","Erector spinae"],set:3,tekrar:"30-45",birim:"sn"}]},
   {id:"cum",gun:"Cum",baslik:"Üst vücut (göğüs/omuz)",hareketler:[
-    {ad:"Incline press",kas:["Üst göğüs","Ön omuz","Triceps"],set:3,tekrar:"8-12"},
-    {ad:"Pec deck",kas:["Göğüs"],set:3,tekrar:"8-12"},
-    {ad:"Shoulder press makinesi",kas:["Ön omuz","Yan omuz","Triceps"],set:3,tekrar:"8-12"},
-    {ad:"Lateral raise",kas:["Yan omuz"],set:3,tekrar:"8-12"},
-    {ad:"Lat pulldown",kas:["Kanat","Biceps"],set:3,tekrar:"8-12"},
-    {ad:"Reverse pec deck",kas:["Arka omuz","Orta sırt"],set:3,tekrar:"8-12"}]},
+    {ad:"Incline press",kas:["Pectoralis major (clavicular)","Anterior deltoid","Triceps brachii"],set:3,tekrar:"8-12"},
+    {ad:"Pec deck",kas:["Pectoralis major"],set:3,tekrar:"8-12"},
+    {ad:"Shoulder press makinesi",kas:["Anterior deltoid","Lateral deltoid","Triceps brachii"],set:3,tekrar:"8-12"},
+    {ad:"Lateral raise",kas:["Lateral deltoid"],set:3,tekrar:"8-12"},
+    {ad:"Lat pulldown",kas:["Latissimus dorsi","Biceps brachii"],set:3,tekrar:"8-12"},
+    {ad:"Reverse pec deck",kas:["Posterior deltoid","Rhomboids"],set:3,tekrar:"8-12"}]},
   {id:"cmt",gun:"Cmt",baslik:"Alt vücut + karın",hareketler:[
-    {ad:"Hack squat veya leg press",kas:["Ön bacak","Kalça"],set:3,tekrar:"8-12"},
-    {ad:"Leg curl",kas:["Arka bacak"],set:3,tekrar:"8-12"},
-    {ad:"Back extension",kas:["Bel","Kalça","Arka bacak"],set:3,tekrar:"8-12"},
-    {ad:"Calf raise",kas:["Baldır"],set:3,tekrar:"8-12"},
-    {ad:"Cable crunch",kas:["Karın"],set:3,tekrar:"8-12"}]}
+    {ad:"Hack squat veya leg press",kas:["Quadriceps","Gluteus maximus"],set:3,tekrar:"8-12"},
+    {ad:"Leg curl",kas:["Hamstrings"],set:3,tekrar:"8-12"},
+    {ad:"Back extension",kas:["Erector spinae","Gluteus maximus","Hamstrings"],set:3,tekrar:"8-12"},
+    {ad:"Calf raise",kas:["Gastrocnemius"],set:3,tekrar:"8-12"},
+    {ad:"Cable crunch",kas:["Rectus abdominis"],set:3,tekrar:"8-12"}]}
 ]};
 const WD = {pzt:0,sal:1,"çar":2,car:2,per:3,cum:4,cmt:5,paz:6};
 const MONTHS = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
@@ -164,10 +165,13 @@ const $ = id => document.getElementById(id);
 let state = {program: JSON.parse(JSON.stringify(DEFAULT_PROGRAM)), logs:{}, notes:{}, updatedAt:0};
 try { const s = JSON.parse(localStorage.getItem(LS)); if (s && s.program && s.logs) state = s; } catch(e){}
 if (!state.notes) state.notes = {};
-// Eski kayıtlı programlarda "kas" yok: adı bilinen hareketlere varsayılan kasları ekle. "kas":[] yazılmışsa dokunma.
-const KAS = {}; DEFAULT_PROGRAM.gunler.forEach(g=>g.hareketler.forEach(h=>{ KAS[h.ad] = h.kas; }));
-function fillKas(p){ try { p.gunler.forEach(g=>g.hareketler.forEach(h=>{ if (h.kas===undefined && KAS[h.ad]) h.kas = KAS[h.ad].slice(); })); } catch(e){} return p; }
-fillKas(state.program);
+// Kaslar programda ne yazıyorsa o (otomatik ekleme yok). Tek istisna: önceki sürümün yazdığı Türkçe adlar literatürdeki ada çevrilir.
+const KAS_TR = {"Göğüs":"Pectoralis major","Üst göğüs":"Pectoralis major (clavicular)","Ön omuz":"Anterior deltoid","Yan omuz":"Lateral deltoid",
+  "Arka omuz":"Posterior deltoid","Triceps":"Triceps brachii","Biceps":"Biceps brachii","Kanat":"Latissimus dorsi","Orta sırt":"Rhomboids",
+  "Ön kol":"Brachioradialis","Ön bacak":"Quadriceps","Arka bacak":"Hamstrings","Kalça":"Gluteus maximus","Baldır":"Gastrocnemius",
+  "Karın":"Rectus abdominis","Bel":"Erector spinae"};
+function kasAdlari(p){ try { p.gunler.forEach(g=>g.hareketler.forEach(h=>{ if (Array.isArray(h.kas)) h.kas = h.kas.map(k=>KAS_TR[k]||k); })); } catch(e){} return p; }
+kasAdlari(state.program);
 if (!state.meals) state.meals = {}; // eski kayıtlarda yok: meals[hafta][gun.id] = "metin"
 
 // ---- tarih ----
@@ -213,7 +217,7 @@ function setVal(g, h, i, field, v){
   persist();
 }
 function num(v){ const n = parseFloat(String(v==null?"":v).replace(",", ".")); return isFinite(n) ? n : null; }
-function filledCount(wk, g){ let c=0; for (const h of g.hareketler) for (const s of getSets(wk,g,h)) if (num(s.r)!=null) c++; return c; }
+function filledCount(wk, g){ let c=0; for (const h of g.hareketler) for (const s of getSets(wk,g,h)) if (num(s.r)!=null && !s.oto) c++; return c; }
 function targetCount(g){ return g.hareketler.reduce((n,h)=>n+(h.set||3),0); }
 function unit(h){ return h.birim==="sn" ? "sn" : "tekrar"; }
 
@@ -251,21 +255,28 @@ function render(){
     let last = sets.length; while (last>0 && num(sets[last-1].kg)==null && num(sets[last-1].r)==null) last--;
     const n = Math.max(h.set||3, last);
     const rows = el("div",{class:"rows"},[el("span",{class:"h",text:"Set"}),el("span",{class:"h",text:"Kg"}),el("span",{class:"h",text:u==="sn"?"Saniye":"Tekrar"})]);
+    const paint = (j, skip) => { const t = getSets(wk,g,h)[j] || {};
+      ["kg","r"].forEach(f=>{ const x = $("in-"+dayIdx+"-"+hi+"-"+j+"-"+f); if (!x) return;
+        if (x !== skip) x.value = t[f] || "";
+        x.classList.toggle("filled", num(x.value)!=null && !t.oto); x.classList.toggle("oto", !!t.oto); }); };
     const addRow = i => {
       const s = getSets(wk,g,h)[i] || {kg:"",r:""};
       rows.appendChild(el("span",{class:"n",text:String(i+1)}));
       [["kg","decimal","kg"],["r","numeric",u]].forEach(([f,mode,ph])=>{
         const inp = el("input",{id:"in-"+dayIdx+"-"+hi+"-"+i+"-"+f,type:"text",inputmode:mode,placeholder:ph,autocomplete:"off","aria-label":h.ad+" "+(i+1)+". set "+ph});
-        inp.value = s[f] || ""; inp.classList.toggle("filled", num(inp.value)!=null);
+        inp.value = s[f] || ""; inp.classList.toggle("filled", num(inp.value)!=null && !s.oto); inp.classList.toggle("oto", !!s.oto);
         inp.addEventListener("input",()=>{
-          const v = inp.value.trim(), old = (getSets(wk,g,h)[i]||{})[f] || "";
-          setVal(g,h,i,f,v); inp.classList.toggle("filled", num(v)!=null);
-          // sonraki setlere taşı: kutu boşsa ya da hâlâ bu setin eski değerini taşıyorsa (elle değiştirilmişe dokunma)
+          setVal(g,h,i,f,inp.value.trim());
+          const a = getSets(wk,g,h); delete a[i].oto;
+          // sonraki setlere taşı: boş ya da henüz dokunulmamış (oto) setlere; elle girilmiş ilk sette dur
           for (let j=i+1;j<count;j++){
-            const o = (getSets(wk,g,h)[j]||{})[f] || ""; if (o!=="" && o!==old) continue;
-            setVal(g,h,j,f,v); const x = $("in-"+dayIdx+"-"+hi+"-"+j+"-"+f); if (x) { x.value = v; x.classList.toggle("filled", num(v)!=null); }
+            const t = a[j] || (a[j] = {kg:"",r:""});
+            if (!t.oto && (t.kg || t.r)) break;
+            t[f] = a[i][f]; if (t.kg || t.r) t.oto = 1; else delete t.oto;
           }
-          renderTabs(); });
+          persist(); for (let j=i;j<count;j++) paint(j, inp); renderTabs(); });
+        // otomatik gelen sete dokununca onaylanır: soluk kalkar, sayılmaya başlar
+        inp.addEventListener("click",()=>{ const t = getSets(wk,g,h)[i]; if (t && t.oto) { delete t.oto; persist(); paint(i); renderTabs(); } });
         rows.appendChild(inp);
       });
     };
@@ -273,13 +284,13 @@ function render(){
     let count = n;
     const add = el("button",{class:"add",text:"+ Set ekle"});
     add.addEventListener("click",()=>{ const p = count>0 ? getSets(wk,g,h)[count-1] : null;
-      if (p) ["kg","r"].forEach(f=>{ if (p[f]) setVal(g,h,count,f,p[f]); });
-      addRow(count++); renderTabs(); });
+      if (p && (p.kg || p.r)) { setVal(g,h,count,"kg",p.kg||""); const t = getSets(wk,g,h)[count]; t.r = p.r||""; t.oto = 1; persist(); }
+      addRow(count++); });
     const kids = [el("header",{},[el("h3",{},[el("a",{text:h.ad,target:"_blank",rel:"noopener",title:"Nasıl yapıldığını ara",
       href:"https://www.google.com/search?q="+encodeURIComponent((h.ad.replace(/\([^)]*\)/g,"").trim()||h.ad)+" nasıl yapılır")})]),el("span",{class:"goal",text:(h.set||3)+" × "+h.tekrar+(u==="sn"?" sn":"")})])];
     if (h.kas && h.kas.length) kids.push(el("div",{class:"kas"}, h.kas.map(k=>el("a",{target:"_blank",rel:"noopener",title:"Bu kası ara",
-      href:"https://www.google.com/search?q="+encodeURIComponent(k+" kası")},[el("span",{text:k})]))));
-    const prev = getSets(pk,g,h).filter(s=>num(s.r)!=null).map(s=>(num(s.kg)!=null?num(s.kg)+" kg × ":"")+num(s.r)+(u==="sn"?" sn":""));
+      href:"https://www.google.com/search?q="+encodeURIComponent(k+" muscle")},[el("span",{text:k})]))));
+    const prev = getSets(pk,g,h).filter(s=>num(s.r)!=null && !s.oto).map(s=>(num(s.kg)!=null?num(s.kg)+" kg × ":"")+num(s.r)+(u==="sn"?" sn":""));
     if (prev.length) kids.push(el("div",{class:"prev",text:"Geçen hafta: "+prev.join(" · ")}));
     const mv = (d,label,aria)=>{ const b=el("button",{class:"mv",text:label,"aria-label":h.ad+": "+aria}), j=hi+d;
       if (j<0 || j>=g.hareketler.length) b.disabled = true;
@@ -301,7 +312,7 @@ function buildExport(){
       const d = dayDate(g), note = ((state.notes[wk]||{})[g.id]) || "", meal = ((state.meals[wk]||{})[g.id]) || "";
       const o = {gun:g.gun, baslik:g.baslik||""}; if (d) o.tarih = key(d); if (note) o.not = note; if (meal) o.yemek = meal;
       o.hareketler = g.hareketler.map(h=>({ad:h.ad, kas:h.kas||[], hedef:(h.set||3)+"x"+h.tekrar+(unit(h)==="sn"?" sn":""),
-        setler: getSets(wk,g,h).filter(s=>num(s.r)!=null).map(s=>{ const x={kg:num(s.kg)}; x[unit(h)==="sn"?"saniye":"tekrar"]=num(s.r); return x; })}));
+        setler: getSets(wk,g,h).filter(s=>num(s.r)!=null && !s.oto).map(s=>{ const x={kg:num(s.kg)}; x[unit(h)==="sn"?"saniye":"tekrar"]=num(s.r); return x; })}));
       return o; })};
 }
 function fillExport(){ $("exportText").value = JSON.stringify(buildExport(), null, 1); }
@@ -340,7 +351,7 @@ $("progClose").addEventListener("click",()=>{ $("progPanel").hidden=true; });
 $("progReset").addEventListener("click",()=>{ $("progText").value = JSON.stringify(DEFAULT_PROGRAM,null,1); const m=$("progMsg"); m.className="msg"; m.textContent="Varsayılan program kutuya yüklendi. Uygulamak için \"Programı kaydet\"e dokun."; });
 $("progSave").addEventListener("click",()=>{
   const m = $("progMsg");
-  try { state.program = fillKas(validate(JSON.parse($("progText").value))); }
+  try { state.program = kasAdlari(validate(JSON.parse($("progText").value))); }
   catch(e){ m.className="msg err"; m.textContent = "Kaydedilmedi: "+(e instanceof SyntaxError ? "JSON biçimi bozuk (virgül ya da tırnak eksik olabilir)." : e.message); return; }
   if (dayIdx >= days().length) dayIdx = 0;
   persist(); render(); m.className="msg ok"; m.textContent="Program kaydedildi.";
@@ -363,7 +374,7 @@ $("bakLoad").addEventListener("click",()=>{
   try { s = JSON.parse($("bakText").value); if (!s || typeof s.logs!=="object" || !s.logs) throw new Error("Bu bir yedek değil: \"logs\" alanı yok."); validate(s.program); }
   catch(e){ disarm(); bakSay("err", "Geri yüklenmedi: "+(e instanceof SyntaxError ? "metin bozuk ya da eksik kopyalanmış." : e.message)); return; }
   if (!armed) { armed=true; $("bakLoad").textContent="Eminim, üzerine yaz"; bakSay("", "Bu telefondaki mevcut kayıtların yerine "+Object.keys(s.logs).length+" haftalık yedek gelecek. Onaylamak için tekrar dokun."); return; }
-  state = {program:fillKas(s.program), logs:s.logs, notes:s.notes||{}, meals:s.meals||{}, updatedAt:0};
+  state = {program:kasAdlari(s.program), logs:s.logs, notes:s.notes||{}, meals:s.meals||{}, updatedAt:0};
   if (dayIdx >= days().length) dayIdx = 0;
   disarm(); persist(); render(); bakSay("ok","Yedek geri yüklendi.");
 });
