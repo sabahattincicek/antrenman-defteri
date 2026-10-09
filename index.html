@@ -93,6 +93,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <div class="dayhead"><h2 id="dayTitle"></h2><span id="dayDate"></span></div>
   <div class="list" id="list"></div>
   <textarea class="note" id="dayNote" placeholder="Bu günün notu (isteğe bağlı): uyku, ağrı, kolay/zor geldi…"></textarea>
+  <textarea class="note" id="dayMeal" aria-label="Bugün ne yedim" placeholder="Bugün ne yedim (isteğe bağlı): kahvaltı, öğle, akşam, ara öğün…"></textarea>
 
   <div class="tools">
     <button class="btn primary" id="exportBtn">Bu haftayı JSON olarak çıkar</button>
@@ -160,6 +161,7 @@ const $ = id => document.getElementById(id);
 let state = {program: JSON.parse(JSON.stringify(DEFAULT_PROGRAM)), logs:{}, notes:{}, updatedAt:0};
 try { const s = JSON.parse(localStorage.getItem(LS)); if (s && s.program && s.logs) state = s; } catch(e){}
 if (!state.notes) state.notes = {};
+if (!state.meals) state.meals = {}; // eski kayıtlarda yok: meals[hafta][gun.id] = "metin"
 
 // ---- tarih ----
 function monday(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; }
@@ -178,7 +180,7 @@ let dayIdx = 0;
 function persist(){
   state.updatedAt = Date.now();
   const ks = Object.keys(state.logs).sort();
-  while (ks.length > 40) { const k=ks.shift(); delete state.logs[k]; delete state.notes[k]; }
+  while (ks.length > 40) { const k=ks.shift(); delete state.logs[k]; delete state.notes[k]; delete state.meals[k]; }
   try { localStorage.setItem(LS, JSON.stringify(state)); } catch(e){}
 }
 
@@ -255,6 +257,7 @@ function render(){
     list.appendChild(el("section",{class:"ex"},kids));
   });
   $("dayNote").value = ((state.notes[wk]||{})[g.id]) || "";
+  $("dayMeal").value = ((state.meals[wk]||{})[g.id]) || "";
   if (!$("exportPanel").hidden) fillExport();
 }
 
@@ -263,8 +266,8 @@ function buildExport(){
   const wk = key(week);
   return {hafta_baslangic: wk, hafta_no: isoWeek(week), birim: "kg",
     gunler: state.program.gunler.map(g=>{
-      const d = dayDate(g), note = ((state.notes[wk]||{})[g.id]) || "";
-      const o = {gun:g.gun, baslik:g.baslik||""}; if (d) o.tarih = key(d); if (note) o.not = note;
+      const d = dayDate(g), note = ((state.notes[wk]||{})[g.id]) || "", meal = ((state.meals[wk]||{})[g.id]) || "";
+      const o = {gun:g.gun, baslik:g.baslik||""}; if (d) o.tarih = key(d); if (note) o.not = note; if (meal) o.yemek = meal;
       o.hareketler = g.hareketler.map(h=>({ad:h.ad, hedef:(h.set||3)+"x"+h.tekrar+(unit(h)==="sn"?" sn":""),
         setler: getSets(wk,g,h).filter(s=>num(s.r)!=null).map(s=>{ const x={kg:num(s.kg)}; x[unit(h)==="sn"?"saniye":"tekrar"]=num(s.r); return x; })}));
       return o; })};
@@ -323,7 +326,7 @@ $("bakLoad").addEventListener("click",()=>{
   try { s = JSON.parse($("bakText").value); if (!s || typeof s.logs!=="object" || !s.logs) throw new Error("Bu bir yedek değil: \"logs\" alanı yok."); validate(s.program); }
   catch(e){ disarm(); bakSay("err", "Geri yüklenmedi: "+(e instanceof SyntaxError ? "metin bozuk ya da eksik kopyalanmış." : e.message)); return; }
   if (!armed) { armed=true; $("bakLoad").textContent="Eminim, üzerine yaz"; bakSay("", "Bu telefondaki mevcut kayıtların yerine "+Object.keys(s.logs).length+" haftalık yedek gelecek. Onaylamak için tekrar dokun."); return; }
-  state = {program:s.program, logs:s.logs, notes:s.notes||{}, updatedAt:0};
+  state = {program:s.program, logs:s.logs, notes:s.notes||{}, meals:s.meals||{}, updatedAt:0};
   if (dayIdx >= state.program.gunler.length) dayIdx = 0;
   disarm(); persist(); render(); bakSay("ok","Yedek geri yüklendi.");
 });
@@ -331,6 +334,7 @@ $("bakLoad").addEventListener("click",()=>{
 $("prevWeek").addEventListener("click",()=>{ week = addDays(week,-7); render(); });
 $("nextWeek").addEventListener("click",()=>{ week = addDays(week,7); render(); });
 $("dayNote").addEventListener("input",()=>{ const wk=key(week), g=state.program.gunler[dayIdx]; (state.notes[wk]=state.notes[wk]||{})[g.id] = $("dayNote").value; persist(); });
+$("dayMeal").addEventListener("input",()=>{ const wk=key(week), g=state.program.gunler[dayIdx]; (state.meals[wk]=state.meals[wk]||{})[g.id] = $("dayMeal").value; persist(); });
 
 render();
 
