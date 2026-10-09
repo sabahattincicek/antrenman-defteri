@@ -36,9 +36,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .week h1{flex:1;min-width:0;margin:0;font-family:var(--display);font-weight:700;font-size:26px;line-height:1.1;letter-spacing:.01em}
 .week h1 small{display:block;font-family:var(--body);font-weight:500;font-size:13px;color:var(--muted);letter-spacing:0}
 .nav{width:44px;height:44px;border:1px solid var(--line);background:var(--surface);border-radius:10px;font-size:20px;line-height:1}
-.tabs{display:flex;gap:6px}
+.tabs{display:flex;gap:4px;margin-inline:-8px}
 .tab{flex:1;min-width:0;padding:8px 2px 6px;border:1px solid var(--line);background:var(--surface);border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:1px}
-.tab b{font-family:var(--display);font-weight:700;font-size:19px;text-transform:uppercase;letter-spacing:.04em}
+.tab b{font-family:var(--display);font-weight:700;font-size:17px;text-transform:uppercase;letter-spacing:.02em}
 .tab span{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
 .tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
 .tab[aria-selected="true"] span{color:inherit;opacity:.85}
@@ -171,10 +171,22 @@ function isoWeek(d){ const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.ge
   const f=new Date(Date.UTC(t.getUTCFullYear(),0,4)); return 1+Math.round(((t-f)/864e5-3+((f.getUTCDay()+6)%7))/7); }
 function wdOf(g){ const k=String(g.gun||"").toLocaleLowerCase("tr").slice(0,3); return k in WD ? WD[k] : null; }
 function dayDate(g){ const o=wdOf(g); return o==null ? null : addDays(week,o); }
+// Ekranda 7 gün: programda olmayan hafta günleri "Dinlenme" olarak araya girer. Programa yazılmaz;
+// not ve yemek kayıtları bu id'lerle tutulur (programa sonradan "Per" günü eklenirse id yine "per" olur).
+const WEEK = [["pzt","Pzt"],["sal","Sal"],["car","Çar"],["per","Per"],["cum","Cum"],["cmt","Cmt"],["paz","Paz"]];
+function days(){
+  const out = state.program.gunler.slice();
+  WEEK.forEach(([id,gun],w)=>{
+    if (out.some(g=>wdOf(g)===w || g.id===id)) return;
+    const at = out.findIndex(g=>{ const o=wdOf(g); return o!=null && o>w; });
+    out.splice(at<0 ? out.length : at, 0, {id, gun, baslik:"Dinlenme", hareketler:[]});
+  });
+  return out;
+}
 
 let week = monday(new Date());
 let dayIdx = 0;
-(function(){ const t=(new Date().getDay()+6)%7; const i=state.program.gunler.findIndex(g=>wdOf(g)===t); if(i>=0) dayIdx=i; })();
+(function(){ const t=(new Date().getDay()+6)%7; const i=days().findIndex(g=>wdOf(g)===t); if(i>=0) dayIdx=i; })();
 
 // ---- kayıt ----
 function persist(){
@@ -205,10 +217,10 @@ function el(tag, attrs, kids){ const e=document.createElement(tag);
 
 function renderTabs(){
   const wk = key(week), box = $("tabs"); box.textContent = "";
-  state.program.gunler.forEach((g,i)=>{
+  days().forEach((g,i)=>{
     const f = filledCount(wk,g), t = targetCount(g);
-    const b = el("button",{class:"tab"+(f>=t?" done":""),role:"tab","aria-selected":String(i===dayIdx),id:"tab-"+i},
-      [el("b",{text:g.gun}), el("span",{text:f+"/"+t})]);
+    const b = el("button",{class:"tab"+(t>0&&f>=t?" done":""),role:"tab","aria-selected":String(i===dayIdx),id:"tab-"+i},
+      [el("b",{text:g.gun}), el("span",{text:t>0 ? f+"/"+t : "–"})]);
     b.addEventListener("click",()=>{ dayIdx=i; render(); window.scrollTo(0,0); });
     box.appendChild(b);
   });
@@ -222,10 +234,11 @@ function renderHeader(){
 }
 function render(){
   renderHeader(); renderTabs();
-  const g = state.program.gunler[dayIdx], wk = key(week), pk = key(addDays(week,-7));
+  const g = days()[dayIdx], wk = key(week), pk = key(addDays(week,-7));
   $("dayTitle").textContent = g.baslik || g.gun;
   const dd = dayDate(g); $("dayDate").textContent = dd ? dd.getDate()+" "+MONTHS[dd.getMonth()] : "";
   const list = $("list"); list.textContent = "";
+  if (!g.hareketler.length) list.appendChild(el("p",{class:"msg",text:"Dinlenme günü. Yürüyüş gibi şeyleri aşağıdaki nota yazabilirsin."}));
   g.hareketler.forEach((h,hi)=>{
     const sets = getSets(wk,g,h), u = unit(h);
     let last = sets.length; while (last>0 && num(sets[last-1].kg)==null && num(sets[last-1].r)==null) last--;
@@ -265,7 +278,7 @@ function render(){
 function buildExport(){
   const wk = key(week);
   return {hafta_baslangic: wk, hafta_no: isoWeek(week), birim: "kg",
-    gunler: state.program.gunler.map(g=>{
+    gunler: days().map(g=>{
       const d = dayDate(g), note = ((state.notes[wk]||{})[g.id]) || "", meal = ((state.meals[wk]||{})[g.id]) || "";
       const o = {gun:g.gun, baslik:g.baslik||""}; if (d) o.tarih = key(d); if (note) o.not = note; if (meal) o.yemek = meal;
       o.hareketler = g.hareketler.map(h=>({ad:h.ad, hedef:(h.set||3)+"x"+h.tekrar+(unit(h)==="sn"?" sn":""),
@@ -305,7 +318,7 @@ $("progSave").addEventListener("click",()=>{
   const m = $("progMsg");
   try { state.program = validate(JSON.parse($("progText").value)); }
   catch(e){ m.className="msg err"; m.textContent = "Kaydedilmedi: "+(e instanceof SyntaxError ? "JSON biçimi bozuk (virgül ya da tırnak eksik olabilir)." : e.message); return; }
-  if (dayIdx >= state.program.gunler.length) dayIdx = 0;
+  if (dayIdx >= days().length) dayIdx = 0;
   persist(); render(); m.className="msg ok"; m.textContent="Program kaydedildi.";
 });
 
@@ -327,14 +340,14 @@ $("bakLoad").addEventListener("click",()=>{
   catch(e){ disarm(); bakSay("err", "Geri yüklenmedi: "+(e instanceof SyntaxError ? "metin bozuk ya da eksik kopyalanmış." : e.message)); return; }
   if (!armed) { armed=true; $("bakLoad").textContent="Eminim, üzerine yaz"; bakSay("", "Bu telefondaki mevcut kayıtların yerine "+Object.keys(s.logs).length+" haftalık yedek gelecek. Onaylamak için tekrar dokun."); return; }
   state = {program:s.program, logs:s.logs, notes:s.notes||{}, meals:s.meals||{}, updatedAt:0};
-  if (dayIdx >= state.program.gunler.length) dayIdx = 0;
+  if (dayIdx >= days().length) dayIdx = 0;
   disarm(); persist(); render(); bakSay("ok","Yedek geri yüklendi.");
 });
 
 $("prevWeek").addEventListener("click",()=>{ week = addDays(week,-7); render(); });
 $("nextWeek").addEventListener("click",()=>{ week = addDays(week,7); render(); });
-$("dayNote").addEventListener("input",()=>{ const wk=key(week), g=state.program.gunler[dayIdx]; (state.notes[wk]=state.notes[wk]||{})[g.id] = $("dayNote").value; persist(); });
-$("dayMeal").addEventListener("input",()=>{ const wk=key(week), g=state.program.gunler[dayIdx]; (state.meals[wk]=state.meals[wk]||{})[g.id] = $("dayMeal").value; persist(); });
+$("dayNote").addEventListener("input",()=>{ const wk=key(week), g=days()[dayIdx]; (state.notes[wk]=state.notes[wk]||{})[g.id] = $("dayNote").value; persist(); });
+$("dayMeal").addEventListener("input",()=>{ const wk=key(week), g=days()[dayIdx]; (state.meals[wk]=state.meals[wk]||{})[g.id] = $("dayMeal").value; persist(); });
 
 render();
 
