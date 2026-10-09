@@ -44,6 +44,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .tab[aria-selected="true"] span{color:inherit;opacity:.85}
 .tab.done:not([aria-selected="true"]) span{color:var(--ok);font-weight:600}
 
+.body{display:flex;gap:10px}
+.body label{flex:1;min-width:0;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);white-space:nowrap}
+.body input{flex:1;min-width:0;height:46px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);font:500 18px var(--body);text-align:center;font-variant-numeric:tabular-nums}
 .dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .dayhead h2{margin:0;font-family:var(--display);font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:.03em;text-wrap:balance}
 .dayhead span{font-size:13px;color:var(--muted);white-space:nowrap}
@@ -92,6 +95,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
       <button class="nav" id="nextWeek" aria-label="Sonraki hafta">›</button>
     </div>
     <div class="tabs" id="tabs" role="tablist"></div>
+  </div>
+
+  <div class="body">
+    <label>Boy (cm)<input id="boy" type="text" inputmode="decimal" autocomplete="off" placeholder="cm"></label>
+    <label>Kilo (kg)<input id="kilo" type="text" inputmode="decimal" autocomplete="off" placeholder="kg"></label>
   </div>
 
   <div class="dayhead"><h2 id="dayTitle"></h2><span id="dayDate"></span></div>
@@ -167,6 +175,7 @@ const $ = id => document.getElementById(id);
 let state = {program: JSON.parse(JSON.stringify(DEFAULT_PROGRAM)), logs:{}, notes:{}, updatedAt:0};
 try { const s = JSON.parse(localStorage.getItem(LS)); if (s && s.program && s.logs) state = s; } catch(e){}
 if (!state.notes) state.notes = {};
+if (!state.body) state.body = {}; // eski kayıtlarda yok: body[hafta] = {boy:"", kilo:""}
 // Kaslar programda ne yazıyorsa o (otomatik ekleme yok). Tek istisna: önceki sürümün yazdığı Türkçe adlar literatürdeki ada çevrilir.
 const KAS_TR = {"Göğüs":"Pectoralis major","Üst göğüs":"Pectoralis major (clavicular)","Ön omuz":"Anterior deltoid","Yan omuz":"Lateral deltoid",
   "Arka omuz":"Posterior deltoid","Triceps":"Triceps brachii","Biceps":"Biceps brachii","Kanat":"Latissimus dorsi","Orta sırt":"Rhomboids",
@@ -221,6 +230,10 @@ function setVal(g, h, i, field, v){
 function num(v){ const n = parseFloat(String(v==null?"":v).replace(",", ".")); return isFinite(n) ? n : null; }
 function filledCount(wk, g){ let c=0; for (const h of g.hareketler) for (const s of getSets(wk,g,h)) if (num(s.r)!=null && !s.oto) c++; return c; }
 function targetCount(g){ return g.hareketler.reduce((n,h)=>n+(h.set||3),0); }
+function bodyOf(wk){ return state.body[wk] || {}; }
+// boy her hafta değişmez: bu hafta yazılmadıysa en son yazılan geçerli
+function boyAt(wk){ if (bodyOf(wk).boy) return bodyOf(wk).boy;
+  const ks = Object.keys(state.body).filter(k=>k<wk && state.body[k].boy).sort(); return ks.length ? state.body[ks[ks.length-1]].boy : ""; }
 function unit(h){ return h.birim==="sn" ? "sn" : "tekrar"; }
 
 // ---- çizim ----
@@ -248,6 +261,7 @@ function renderHeader(){
 function render(){
   renderHeader(); renderTabs();
   const g = days()[dayIdx], wk = key(week), pk = key(addDays(week,-7));
+  $("boy").value = boyAt(wk); $("kilo").value = bodyOf(wk).kilo || "";
   $("dayTitle").textContent = g.baslik || g.gun;
   const dd = dayDate(g); $("dayDate").textContent = dd ? dd.getDate()+" "+MONTHS[dd.getMonth()] : "";
   const list = $("list"); list.textContent = "";
@@ -309,13 +323,16 @@ function render(){
 // ---- dışa aktarım ----
 function buildExport(){
   const wk = key(week);
-  return {hafta_baslangic: wk, hafta_no: isoWeek(week), birim: "kg",
-    gunler: days().map(g=>{
+  const out = {hafta_baslangic: wk, hafta_no: isoWeek(week), birim: "kg"};
+  if (num(boyAt(wk))!=null) out.boy_cm = num(boyAt(wk));
+  if (num(bodyOf(wk).kilo)!=null) out.kilo_kg = num(bodyOf(wk).kilo);
+  out.gunler = days().map(g=>{
       const d = dayDate(g), note = ((state.notes[wk]||{})[g.id]) || "", meal = ((state.meals[wk]||{})[g.id]) || "";
       const o = {gun:g.gun, baslik:g.baslik||""}; if (d) o.tarih = key(d); if (note) o.not = note; if (meal) o.yemek = meal;
       o.hareketler = g.hareketler.map(h=>({ad:h.ad, kas:h.kas||[], hedef:(h.set||3)+"x"+h.tekrar+(unit(h)==="sn"?" sn":""),
         setler: getSets(wk,g,h).filter(s=>num(s.r)!=null && !s.oto).map(s=>{ const x={kg:num(s.kg)}; x[unit(h)==="sn"?"saniye":"tekrar"]=num(s.r); return x; })}));
-      return o; })};
+      return o; });
+  return out;
 }
 function fillExport(){ $("exportText").value = JSON.stringify(buildExport(), null, 1); }
 $("exportBtn").addEventListener("click",()=>{ fillExport(); $("exportPanel").hidden=false; $("exportMsg").textContent=""; $("exportPanel").scrollIntoView({block:"nearest"}); });
@@ -377,7 +394,7 @@ $("bakLoad").addEventListener("click",()=>{
   try { s = JSON.parse($("bakText").value); if (!s || typeof s.logs!=="object" || !s.logs) throw new Error("Bu bir yedek değil: \"logs\" alanı yok."); validate(s.program); }
   catch(e){ disarm(); bakSay("err", "Geri yüklenmedi: "+(e instanceof SyntaxError ? "metin bozuk ya da eksik kopyalanmış." : e.message)); return; }
   if (!armed) { armed=true; $("bakLoad").textContent="Eminim, üzerine yaz"; bakSay("", "Bu telefondaki mevcut kayıtların yerine "+Object.keys(s.logs).length+" haftalık yedek gelecek. Onaylamak için tekrar dokun."); return; }
-  state = {program:kasAdlari(s.program), logs:s.logs, notes:s.notes||{}, meals:s.meals||{}, updatedAt:0};
+  state = {program:kasAdlari(s.program), logs:s.logs, notes:s.notes||{}, meals:s.meals||{}, body:s.body||{}, updatedAt:0};
   if (dayIdx >= days().length) dayIdx = 0;
   disarm(); persist(); render(); bakSay("ok","Yedek geri yüklendi.");
 });
@@ -385,6 +402,7 @@ $("bakLoad").addEventListener("click",()=>{
 $("prevWeek").addEventListener("click",()=>{ week = addDays(week,-7); render(); });
 $("nextWeek").addEventListener("click",()=>{ week = addDays(week,7); render(); });
 $("dayNote").addEventListener("input",()=>{ const wk=key(week), g=days()[dayIdx]; (state.notes[wk]=state.notes[wk]||{})[g.id] = $("dayNote").value; persist(); });
+["boy","kilo"].forEach(f=>$(f).addEventListener("input",()=>{ const wk=key(week); (state.body[wk]=state.body[wk]||{})[f] = $(f).value.trim(); persist(); if (!$("exportPanel").hidden) fillExport(); }));
 $("dayMeal").addEventListener("input",()=>{ const wk=key(week), g=days()[dayIdx]; (state.meals[wk]=state.meals[wk]||{})[g.id] = $("dayMeal").value; persist(); });
 
 render();
