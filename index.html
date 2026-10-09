@@ -1,0 +1,338 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#eef1f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f141a" media="(prefers-color-scheme: dark)">
+</head><body>
+<title>Antrenman Defteri</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: tek sütun, üstte yapışık hafta + gün şeridi, altında hareket kartları, en altta JSON araçları */
+:root{
+  --bg:#eef1f5; --surface:#ffffff; --sunk:#f4f6f9; --fg:#16202b; --muted:#5b6978; --line:#d3dae3;
+  --accent:#1c5bd0; --accent-fg:#ffffff; --ok:#1b8049; --danger:#c2322b;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f141a; --surface:#19212b; --sunk:#121922; --fg:#e7ecf2; --muted:#93a1b1; --line:#2c3846;
+    --accent:#74a6ff; --accent-fg:#0b1420; --ok:#4dc686; --danger:#ff7d74; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f141a; --surface:#19212b; --sunk:#121922; --fg:#e7ecf2; --muted:#93a1b1; --line:#2c3846;
+  --accent:#74a6ff; --accent-fg:#0b1420; --ok:#4dc686; --danger:#ff7d74; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.4}
+.wrap{max-width:560px;margin-inline:auto;padding-inline:16px;padding-block:0 40px;display:flex;flex-direction:column;gap:16px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 10px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)}
+.week{display:flex;align-items:center;gap:8px}
+.week h1{flex:1;min-width:0;margin:0;font-family:var(--display);font-weight:700;font-size:26px;line-height:1.1;letter-spacing:.01em}
+.week h1 small{display:block;font-family:var(--body);font-weight:500;font-size:13px;color:var(--muted);letter-spacing:0}
+.nav{width:44px;height:44px;border:1px solid var(--line);background:var(--surface);border-radius:10px;font-size:20px;line-height:1}
+.tabs{display:flex;gap:6px}
+.tab{flex:1;min-width:0;padding:8px 2px 6px;border:1px solid var(--line);background:var(--surface);border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:1px}
+.tab b{font-family:var(--display);font-weight:700;font-size:19px;text-transform:uppercase;letter-spacing:.04em}
+.tab span{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.tab[aria-selected="true"] span{color:inherit;opacity:.85}
+.tab.done:not([aria-selected="true"]) span{color:var(--ok);font-weight:600}
+
+.dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.dayhead h2{margin:0;font-family:var(--display);font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:.03em;text-wrap:balance}
+.dayhead span{font-size:13px;color:var(--muted);white-space:nowrap}
+.list{display:flex;flex-direction:column;gap:12px}
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ex header{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.ex h3{margin:0;font-size:17px;font-weight:600;min-width:0}
+.ex h3 a{color:inherit;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:4px}
+.ex h3 a::after{content:" ↗";color:var(--accent);font-weight:500}
+.ex .goal{font-size:13px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.prev{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.rows{display:grid;grid-template-columns:28px 1fr 1fr;gap:8px;align-items:center}
+.rows .h{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.rows .n{font-family:var(--display);font-weight:700;font-size:18px;color:var(--muted);text-align:center}
+.rows input{width:100%;min-width:0;height:46px;border:1px solid var(--line);border-radius:10px;background:var(--sunk);color:var(--fg);font:500 18px var(--body);text-align:center;font-variant-numeric:tabular-nums}
+.rows input.filled{border-color:var(--ok)}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mvs{display:flex;gap:6px}
+.mv{width:44px;height:40px;border:1px solid var(--line);background:var(--sunk);border-radius:10px;font-size:18px;line-height:1}
+.mv:disabled{opacity:.3;cursor:default}
+.add{border:0;background:none;color:var(--accent);font-weight:600;font-size:14px;padding:6px 0}
+.note{width:100%;min-height:64px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);font:16px var(--body);padding:12px;resize:vertical}
+
+.tools{display:flex;flex-direction:column;gap:10px;padding-top:8px;border-top:1px solid var(--line)}
+.btn{min-height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600;padding:10px 14px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.panel{display:flex;flex-direction:column;gap:10px}
+.panel textarea{width:100%;min-height:220px;border:1px solid var(--line);border-radius:12px;background:var(--sunk);color:var(--fg);font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;padding:12px;resize:vertical}
+.rowb{display:flex;gap:8px;flex-wrap:wrap}
+.rowb .btn{flex:1}
+.msg{font-size:14px;color:var(--muted);margin:0}
+.msg.err{color:var(--danger)}
+.msg.ok{color:var(--ok)}
+.sync{font-size:12px;color:var(--muted);text-align:center;margin:0}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div class="week">
+      <button class="nav" id="prevWeek" aria-label="Önceki hafta">‹</button>
+      <h1 id="weekTitle">Hafta</h1>
+      <button class="nav" id="nextWeek" aria-label="Sonraki hafta">›</button>
+    </div>
+    <div class="tabs" id="tabs" role="tablist"></div>
+  </div>
+
+  <div class="dayhead"><h2 id="dayTitle"></h2><span id="dayDate"></span></div>
+  <div class="list" id="list"></div>
+  <textarea class="note" id="dayNote" placeholder="Bu günün notu (isteğe bağlı): uyku, ağrı, kolay/zor geldi…"></textarea>
+
+  <div class="tools">
+    <button class="btn primary" id="exportBtn">Bu haftayı JSON olarak çıkar</button>
+    <div class="panel" id="exportPanel" hidden>
+      <textarea id="exportText" readonly></textarea>
+      <div class="rowb"><button class="btn" id="copyBtn">Kopyala</button><button class="btn" id="exportClose">Kapat</button></div>
+      <p class="msg" id="exportMsg"></p>
+    </div>
+
+    <button class="btn" id="progBtn">Programı düzenle (JSON)</button>
+    <div class="panel" id="progPanel" hidden>
+      <textarea id="progText" spellcheck="false"></textarea>
+      <div class="rowb"><button class="btn primary" id="progSave">Programı kaydet</button><button class="btn" id="progReset">Varsayılanı yükle</button><button class="btn" id="progClose">Kapat</button></div>
+      <p class="msg" id="progMsg">Hareket adını değiştirirsen o hareketin eski kayıtları yeni adla eşleşmez.</p>
+    </div>
+    <button class="btn" id="bakBtn">Tüm kayıtları yedekle / geri yükle</button>
+    <div class="panel" id="bakPanel" hidden>
+      <textarea id="bakText" spellcheck="false"></textarea>
+      <div class="rowb"><button class="btn" id="bakCopy">Yedeği kopyala</button><button class="btn" id="bakLoad">Kutudakini geri yükle</button><button class="btn" id="bakClose">Kapat</button></div>
+      <p class="msg" id="bakMsg">Kutuda bütün haftaların kayıtları ve programın var. Kopyalayıp güvenli bir yere yapıştır. Geri yüklemek için yedeği kutuya yapıştırıp "Kutudakini geri yükle"ye dokun.</p>
+    </div>
+    <p class="sync" id="sync">Kayıtlar bu telefonda saklanıyor.</p>
+  </div>
+</div>
+
+<script>
+const DEFAULT_PROGRAM = {gunler:[
+  {id:"pzt",gun:"Pzt",baslik:"İtiş",hareketler:[
+    {ad:"Chest press makinesi",set:3,tekrar:"8-12"},
+    {ad:"Incline press (makine veya Smith)",set:3,tekrar:"8-12"},
+    {ad:"Shoulder press makinesi",set:3,tekrar:"8-12"},
+    {ad:"Lateral raise (makine veya kablo)",set:3,tekrar:"8-12"},
+    {ad:"Triceps pushdown (kablo)",set:3,tekrar:"8-12"}]},
+  {id:"sal",gun:"Sal",baslik:"Çekiş",hareketler:[
+    {ad:"Lat pulldown",set:3,tekrar:"8-12"},
+    {ad:"Göğüs destekli row makinesi",set:3,tekrar:"8-12"},
+    {ad:"Seated cable row",set:3,tekrar:"8-12"},
+    {ad:"Reverse pec deck (arka omuz)",set:3,tekrar:"8-12"},
+    {ad:"Biceps curl (kablo veya makine)",set:3,tekrar:"8-12"}]},
+  {id:"car",gun:"Çar",baslik:"Bacak",hareketler:[
+    {ad:"Leg press",set:3,tekrar:"8-12"},
+    {ad:"Leg extension",set:3,tekrar:"8-12"},
+    {ad:"Leg curl",set:3,tekrar:"8-12"},
+    {ad:"Calf raise",set:3,tekrar:"8-12"},
+    {ad:"Plank",set:3,tekrar:"30-45",birim:"sn"}]},
+  {id:"cum",gun:"Cum",baslik:"Üst vücut (göğüs/omuz)",hareketler:[
+    {ad:"Incline press",set:3,tekrar:"8-12"},
+    {ad:"Pec deck",set:3,tekrar:"8-12"},
+    {ad:"Shoulder press makinesi",set:3,tekrar:"8-12"},
+    {ad:"Lateral raise",set:3,tekrar:"8-12"},
+    {ad:"Lat pulldown",set:3,tekrar:"8-12"},
+    {ad:"Reverse pec deck",set:3,tekrar:"8-12"}]},
+  {id:"cmt",gun:"Cmt",baslik:"Alt vücut + karın",hareketler:[
+    {ad:"Hack squat veya leg press",set:3,tekrar:"8-12"},
+    {ad:"Leg curl",set:3,tekrar:"8-12"},
+    {ad:"Back extension",set:3,tekrar:"8-12"},
+    {ad:"Calf raise",set:3,tekrar:"8-12"},
+    {ad:"Cable crunch",set:3,tekrar:"8-12"}]}
+]};
+const WD = {pzt:0,sal:1,"çar":2,car:2,per:3,cum:4,cmt:5,paz:6};
+const MONTHS = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+const LS = "antrenman-defteri-v1";
+const $ = id => document.getElementById(id);
+
+let state = {program: JSON.parse(JSON.stringify(DEFAULT_PROGRAM)), logs:{}, notes:{}, updatedAt:0};
+try { const s = JSON.parse(localStorage.getItem(LS)); if (s && s.program && s.logs) state = s; } catch(e){}
+if (!state.notes) state.notes = {};
+
+// ---- tarih ----
+function monday(d){ const x=new Date(d.getFullYear(),d.getMonth(),d.getDate()); x.setDate(x.getDate()-((x.getDay()+6)%7)); return x; }
+function key(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function isoWeek(d){ const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); t.setUTCDate(t.getUTCDate()-((t.getUTCDay()+6)%7)+3);
+  const f=new Date(Date.UTC(t.getUTCFullYear(),0,4)); return 1+Math.round(((t-f)/864e5-3+((f.getUTCDay()+6)%7))/7); }
+function wdOf(g){ const k=String(g.gun||"").toLocaleLowerCase("tr").slice(0,3); return k in WD ? WD[k] : null; }
+function dayDate(g){ const o=wdOf(g); return o==null ? null : addDays(week,o); }
+
+let week = monday(new Date());
+let dayIdx = 0;
+(function(){ const t=(new Date().getDay()+6)%7; const i=state.program.gunler.findIndex(g=>wdOf(g)===t); if(i>=0) dayIdx=i; })();
+
+// ---- kayıt ----
+function persist(){
+  state.updatedAt = Date.now();
+  const ks = Object.keys(state.logs).sort();
+  while (ks.length > 40) { const k=ks.shift(); delete state.logs[k]; delete state.notes[k]; }
+  try { localStorage.setItem(LS, JSON.stringify(state)); } catch(e){}
+}
+
+// ---- veri erişimi ----
+function getSets(wk, g, h){ return (((state.logs[wk]||{})[g.id]||{})[h.ad]) || []; }
+function setVal(g, h, i, field, v){
+  const wk = key(week);
+  const a = (((state.logs[wk] = state.logs[wk]||{})[g.id] = state.logs[wk][g.id]||{})[h.ad] = state.logs[wk][g.id][h.ad]||[]);
+  while (a.length <= i) a.push({kg:"",r:""});
+  a[i][field] = v;
+  persist();
+}
+function num(v){ const n = parseFloat(String(v==null?"":v).replace(",", ".")); return isFinite(n) ? n : null; }
+function filledCount(wk, g){ let c=0; for (const h of g.hareketler) for (const s of getSets(wk,g,h)) if (num(s.r)!=null) c++; return c; }
+function targetCount(g){ return g.hareketler.reduce((n,h)=>n+(h.set||3),0); }
+function unit(h){ return h.birim==="sn" ? "sn" : "tekrar"; }
+
+// ---- çizim ----
+function el(tag, attrs, kids){ const e=document.createElement(tag);
+  for (const k in (attrs||{})) { if (k==="text") e.textContent=attrs[k]; else if (k==="class") e.className=attrs[k]; else e.setAttribute(k, attrs[k]); }
+  for (const c of (kids||[])) e.appendChild(c); return e; }
+
+function renderTabs(){
+  const wk = key(week), box = $("tabs"); box.textContent = "";
+  state.program.gunler.forEach((g,i)=>{
+    const f = filledCount(wk,g), t = targetCount(g);
+    const b = el("button",{class:"tab"+(f>=t?" done":""),role:"tab","aria-selected":String(i===dayIdx),id:"tab-"+i},
+      [el("b",{text:g.gun}), el("span",{text:f+"/"+t})]);
+    b.addEventListener("click",()=>{ dayIdx=i; render(); window.scrollTo(0,0); });
+    box.appendChild(b);
+  });
+}
+function renderHeader(){
+  const end = addDays(week,6);
+  const range = week.getDate()+(week.getMonth()!==end.getMonth()?" "+MONTHS[week.getMonth()]:"")+" – "+end.getDate()+" "+MONTHS[end.getMonth()]+" "+end.getFullYear();
+  const h = $("weekTitle"); h.textContent = isoWeek(week)+". hafta";
+  const isNow = key(week)===key(monday(new Date()));
+  h.appendChild(el("small",{text: range+(isNow?" · bu hafta":"")}));
+}
+function render(){
+  renderHeader(); renderTabs();
+  const g = state.program.gunler[dayIdx], wk = key(week), pk = key(addDays(week,-7));
+  $("dayTitle").textContent = g.baslik || g.gun;
+  const dd = dayDate(g); $("dayDate").textContent = dd ? dd.getDate()+" "+MONTHS[dd.getMonth()] : "";
+  const list = $("list"); list.textContent = "";
+  g.hareketler.forEach((h,hi)=>{
+    const sets = getSets(wk,g,h), u = unit(h);
+    let last = sets.length; while (last>0 && num(sets[last-1].kg)==null && num(sets[last-1].r)==null) last--;
+    const n = Math.max(h.set||3, last);
+    const rows = el("div",{class:"rows"},[el("span",{class:"h",text:"Set"}),el("span",{class:"h",text:"Kg"}),el("span",{class:"h",text:u==="sn"?"Saniye":"Tekrar"})]);
+    const addRow = i => {
+      const s = sets[i] || {kg:"",r:""};
+      rows.appendChild(el("span",{class:"n",text:String(i+1)}));
+      [["kg","decimal","kg"],["r","numeric",u]].forEach(([f,mode,ph])=>{
+        const inp = el("input",{id:"in-"+dayIdx+"-"+hi+"-"+i+"-"+f,type:"text",inputmode:mode,placeholder:ph,autocomplete:"off","aria-label":h.ad+" "+(i+1)+". set "+ph});
+        inp.value = s[f] || ""; inp.classList.toggle("filled", num(inp.value)!=null);
+        inp.addEventListener("input",()=>{ setVal(g,h,i,f,inp.value.trim()); inp.classList.toggle("filled", num(inp.value)!=null); renderTabs(); });
+        rows.appendChild(inp);
+      });
+    };
+    for (let i=0;i<n;i++) addRow(i);
+    let count = n;
+    const add = el("button",{class:"add",text:"+ Set ekle"});
+    add.addEventListener("click",()=>{ addRow(count++); });
+    const kids = [el("header",{},[el("h3",{},[el("a",{text:h.ad,target:"_blank",rel:"noopener",title:"Nasıl yapıldığını ara",
+      href:"https://www.google.com/search?q="+encodeURIComponent((h.ad.replace(/\([^)]*\)/g,"").trim()||h.ad)+" nasıl yapılır")})]),el("span",{class:"goal",text:(h.set||3)+" × "+h.tekrar+(u==="sn"?" sn":"")})])];
+    const prev = getSets(pk,g,h).filter(s=>num(s.r)!=null).map(s=>(num(s.kg)!=null?num(s.kg)+" kg × ":"")+num(s.r)+(u==="sn"?" sn":""));
+    if (prev.length) kids.push(el("div",{class:"prev",text:"Geçen hafta: "+prev.join(" · ")}));
+    const mv = (d,label,aria)=>{ const b=el("button",{class:"mv",text:label,"aria-label":h.ad+": "+aria}), j=hi+d;
+      if (j<0 || j>=g.hareketler.length) b.disabled = true;
+      b.addEventListener("click",()=>{ const a=g.hareketler; const t=a[hi]; a[hi]=a[j]; a[j]=t; persist(); render(); });
+      return b; };
+    kids.push(rows, el("div",{class:"foot"},[add, el("span",{class:"mvs"},[mv(-1,"↑","yukarı taşı"), mv(1,"↓","aşağı taşı")])]));
+    list.appendChild(el("section",{class:"ex"},kids));
+  });
+  $("dayNote").value = ((state.notes[wk]||{})[g.id]) || "";
+  if (!$("exportPanel").hidden) fillExport();
+}
+
+// ---- dışa aktarım ----
+function buildExport(){
+  const wk = key(week);
+  return {hafta_baslangic: wk, hafta_no: isoWeek(week), birim: "kg",
+    gunler: state.program.gunler.map(g=>{
+      const d = dayDate(g), note = ((state.notes[wk]||{})[g.id]) || "";
+      const o = {gun:g.gun, baslik:g.baslik||""}; if (d) o.tarih = key(d); if (note) o.not = note;
+      o.hareketler = g.hareketler.map(h=>({ad:h.ad, hedef:(h.set||3)+"x"+h.tekrar+(unit(h)==="sn"?" sn":""),
+        setler: getSets(wk,g,h).filter(s=>num(s.r)!=null).map(s=>{ const x={kg:num(s.kg)}; x[unit(h)==="sn"?"saniye":"tekrar"]=num(s.r); return x; })}));
+      return o; })};
+}
+function fillExport(){ $("exportText").value = JSON.stringify(buildExport(), null, 1); }
+$("exportBtn").addEventListener("click",()=>{ fillExport(); $("exportPanel").hidden=false; $("exportMsg").textContent=""; $("exportPanel").scrollIntoView({block:"nearest"}); });
+$("exportClose").addEventListener("click",()=>{ $("exportPanel").hidden=true; });
+$("copyBtn").addEventListener("click",()=>{
+  const t = $("exportText"), m = $("exportMsg");
+  const fallback = ()=>{ t.focus(); t.select(); t.setSelectionRange(0, t.value.length); m.className="msg"; m.textContent="Otomatik kopyalanamadı. Metin seçildi, basılı tutup Kopyala'ya dokun."; };
+  try { navigator.clipboard.writeText(t.value).then(()=>{ m.className="msg ok"; m.textContent="Kopyalandı. Yapay zekaya yapıştırabilirsin."; }, fallback); } catch(e){ fallback(); }
+});
+
+// ---- program düzenleme ----
+function validate(p){
+  if (!p || !Array.isArray(p.gunler) || !p.gunler.length) throw new Error("\"gunler\" dizisi eksik ya da boş.");
+  const ids = {};
+  p.gunler.forEach((g,i)=>{
+    if (!g || typeof g.gun!=="string" || !g.gun.trim()) throw new Error((i+1)+". günde \"gun\" alanı eksik.");
+    if (!Array.isArray(g.hareketler) || !g.hareketler.length) throw new Error(g.gun+" gününde \"hareketler\" eksik ya da boş.");
+    g.id = String(g.id || g.gun.toLocaleLowerCase("tr")); if (ids[g.id]) g.id += "-"+i; ids[g.id]=1;
+    const names = {};
+    g.hareketler.forEach((h,j)=>{
+      if (!h || typeof h.ad!=="string" || !h.ad.trim()) throw new Error(g.gun+" gününde "+(j+1)+". hareketin \"ad\" alanı eksik.");
+      if (names[h.ad]) throw new Error(g.gun+" gününde \""+h.ad+"\" iki kez yazılmış.");
+      names[h.ad]=1; h.set = Math.max(1, Math.min(10, parseInt(h.set,10)||3)); h.tekrar = String(h.tekrar==null?"8-12":h.tekrar);
+    });
+  });
+  return p;
+}
+$("progBtn").addEventListener("click",()=>{ $("progText").value = JSON.stringify(state.program,null,1); $("progPanel").hidden=false; $("progPanel").scrollIntoView({block:"nearest"}); });
+$("progClose").addEventListener("click",()=>{ $("progPanel").hidden=true; });
+$("progReset").addEventListener("click",()=>{ $("progText").value = JSON.stringify(DEFAULT_PROGRAM,null,1); const m=$("progMsg"); m.className="msg"; m.textContent="Varsayılan program kutuya yüklendi. Uygulamak için \"Programı kaydet\"e dokun."; });
+$("progSave").addEventListener("click",()=>{
+  const m = $("progMsg");
+  try { state.program = validate(JSON.parse($("progText").value)); }
+  catch(e){ m.className="msg err"; m.textContent = "Kaydedilmedi: "+(e instanceof SyntaxError ? "JSON biçimi bozuk (virgül ya da tırnak eksik olabilir)." : e.message); return; }
+  if (dayIdx >= state.program.gunler.length) dayIdx = 0;
+  persist(); render(); m.className="msg ok"; m.textContent="Program kaydedildi.";
+});
+
+// ---- yedek ----
+let armed = false;
+function bakSay(cls, t){ const m=$("bakMsg"); m.className="msg"+(cls?" "+cls:""); m.textContent=t; }
+function disarm(){ armed=false; $("bakLoad").textContent="Kutudakini geri yükle"; }
+$("bakBtn").addEventListener("click",()=>{ $("bakText").value = JSON.stringify(state); disarm(); $("bakPanel").hidden=false; $("bakPanel").scrollIntoView({block:"nearest"}); });
+$("bakClose").addEventListener("click",()=>{ $("bakPanel").hidden=true; disarm(); });
+$("bakText").addEventListener("input", disarm);
+$("bakCopy").addEventListener("click",()=>{
+  const t = $("bakText"); t.value = JSON.stringify(state); disarm();
+  const fallback = ()=>{ t.focus(); t.select(); t.setSelectionRange(0, t.value.length); bakSay("", "Otomatik kopyalanamadı. Metin seçildi, basılı tutup Kopyala'ya dokun."); };
+  try { navigator.clipboard.writeText(t.value).then(()=>bakSay("ok","Yedek kopyalandı. Notlara ya da kendine mesaj olarak yapıştır."), fallback); } catch(e){ fallback(); }
+});
+$("bakLoad").addEventListener("click",()=>{
+  let s;
+  try { s = JSON.parse($("bakText").value); if (!s || typeof s.logs!=="object" || !s.logs) throw new Error("Bu bir yedek değil: \"logs\" alanı yok."); validate(s.program); }
+  catch(e){ disarm(); bakSay("err", "Geri yüklenmedi: "+(e instanceof SyntaxError ? "metin bozuk ya da eksik kopyalanmış." : e.message)); return; }
+  if (!armed) { armed=true; $("bakLoad").textContent="Eminim, üzerine yaz"; bakSay("", "Bu telefondaki mevcut kayıtların yerine "+Object.keys(s.logs).length+" haftalık yedek gelecek. Onaylamak için tekrar dokun."); return; }
+  state = {program:s.program, logs:s.logs, notes:s.notes||{}, updatedAt:0};
+  if (dayIdx >= state.program.gunler.length) dayIdx = 0;
+  disarm(); persist(); render(); bakSay("ok","Yedek geri yüklendi.");
+});
+
+$("prevWeek").addEventListener("click",()=>{ week = addDays(week,-7); render(); });
+$("nextWeek").addEventListener("click",()=>{ week = addDays(week,7); render(); });
+$("dayNote").addEventListener("input",()=>{ const wk=key(week), g=state.program.gunler[dayIdx]; (state.notes[wk]=state.notes[wk]||{})[g.id] = $("dayNote").value; persist(); });
+
+render();
+</script>
+
+</body></html>

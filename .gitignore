@@ -1,0 +1,5 @@
+# Depo herkese acik: yedek / kullanici verisi buraya girmesin
+*.json
+*.bak
+yedek*
+.claude/
