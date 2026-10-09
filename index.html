@@ -333,6 +333,9 @@ $("nextWeek").addEventListener("click",()=>{ week = addDays(week,7); render(); }
 $("dayNote").addEventListener("input",()=>{ const wk=key(week), g=state.program.gunler[dayIdx]; (state.notes[wk]=state.notes[wk]||{})[g.id] = $("dayNote").value; persist(); });
 
 render();
+
+// çevrimdışı açılış (sw.js sadece sayfa dosyalarını önbelleğe alır, kayıtlara dokunmaz)
+try { if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{}); } catch(e){}
 </script>
 
 </body></html>
