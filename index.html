@@ -72,6 +72,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .mv{width:44px;height:40px;border:1px solid var(--line);background:var(--sunk);border-radius:10px;font-size:18px;line-height:1}
 .mv:disabled{opacity:.3;cursor:default}
 .add{border:0;background:none;color:var(--accent);font-weight:600;font-size:14px;padding:6px 0}
+.notel{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
 .note{width:100%;min-height:120px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);font:16px var(--body);padding:12px;resize:vertical;overflow:hidden}
 
 .tools{display:flex;flex-direction:column;gap:10px;padding-top:8px;border-top:1px solid var(--line)}
@@ -104,8 +105,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
   <div class="dayhead"><h2 id="dayTitle"></h2><span id="dayDate"></span></div>
   <div class="list" id="list"></div>
-  <textarea class="note" id="dayNote" placeholder="Bu günün notu (isteğe bağlı): uyku, ağrı, kolay/zor geldi…"></textarea>
-  <textarea class="note" id="dayMeal" aria-label="Bugün ne yedim" placeholder="Bugün ne yedim (isteğe bağlı): kahvaltı, öğle, akşam, ara öğün…"></textarea>
+  <label class="notel">Günün notu<textarea class="note" id="dayNote" placeholder="İsteğe bağlı: uyku, ağrı, kolay/zor geldi…"></textarea></label>
+  <label class="notel">Bugün ne yedim<textarea class="note" id="dayMeal" placeholder="İsteğe bağlı: kahvaltı, öğle, akşam, ara öğün…"></textarea></label>
 
   <div class="tools">
     <button class="btn primary" id="exportBtn">Bu haftayı JSON olarak çıkar</button>
