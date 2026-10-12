@@ -109,7 +109,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
   <label class="notel">Bugün ne yedim<textarea class="note" id="dayMeal" placeholder="İsteğe bağlı: kahvaltı, öğle, akşam, ara öğün…"></textarea></label>
 
   <div class="tools">
-    <button class="btn primary" id="exportBtn">Bu haftayı JSON olarak çıkar</button>
+    <button class="btn primary" id="exportBtn">Haftalık analiz</button>
     <div class="panel" id="exportPanel" hidden>
       <textarea id="exportText" readonly></textarea>
       <div class="rowb"><button class="btn" id="copyBtn">Kopyala</button><button class="btn" id="exportClose">Kapat</button></div>
@@ -236,6 +236,8 @@ function bodyOf(wk){ return state.body[wk] || {}; }
 function boyAt(wk){ if (bodyOf(wk).boy) return bodyOf(wk).boy;
   const ks = Object.keys(state.body).filter(k=>k<wk && state.body[k].boy).sort(); return ks.length ? state.body[ks[ks.length-1]].boy : ""; }
 function unit(h){ return h.birim==="sn" ? "sn" : "tekrar"; }
+// tamamlanan setler metin olarak: "40 kg × 10" (otomatik gelen, dokunulmamış setler sayılmaz)
+function fmtSets(wk, g, h){ return getSets(wk,g,h).filter(s=>num(s.r)!=null && !s.oto).map(s=>(num(s.kg)!=null?num(s.kg)+" kg × ":"")+num(s.r)+(unit(h)==="sn"?" sn":"")); }
 
 // ---- çizim ----
 function el(tag, attrs, kids){ const e=document.createElement(tag);
@@ -307,7 +309,7 @@ function render(){
       href:"https://www.google.com/search?q="+encodeURIComponent((h.ad.replace(/\([^)]*\)/g,"").trim()||h.ad)+" nasıl yapılır")})]),el("span",{class:"goal",text:(h.set||3)+" × "+h.tekrar+(u==="sn"?" sn":"")})])];
     if (h.kas && h.kas.length) kids.push(el("div",{class:"kas"}, h.kas.map(k=>el("a",{target:"_blank",rel:"noopener",title:"Bu kası ara",
       href:"https://www.google.com/search?q="+encodeURIComponent(k+" muscle")},[el("span",{text:k})]))));
-    const prev = getSets(pk,g,h).filter(s=>num(s.r)!=null && !s.oto).map(s=>(num(s.kg)!=null?num(s.kg)+" kg × ":"")+num(s.r)+(u==="sn"?" sn":""));
+    const prev = fmtSets(pk,g,h);
     if (prev.length) kids.push(el("div",{class:"prev",text:"Geçen hafta: "+prev.join(" · ")}));
     const mv = (d,label,aria)=>{ const b=el("button",{class:"mv",text:label,"aria-label":h.ad+": "+aria}), j=hi+d;
       if (j<0 || j>=g.hareketler.length) b.disabled = true;
@@ -323,20 +325,59 @@ function render(){
 }
 
 // ---- dışa aktarım ----
+// Haftalık analiz: haftanın kaydı düz metin olarak, en altında yapay zekaya verilecek talimat.
+const ANALIZ_PROMPT = [
+"=== YAPAY ZEKA İÇİN TALİMAT ===",
+"Yukarıdaki metin benim bir haftalık antrenman, beslenme ve günlük not kaydım. Deneyimli bir antrenör ve beslenme uzmanı gibi davran ve bu haftanın detaylı bir analizini Türkçe olarak yaz. Yalnızca yukarıdaki veriye dayan; veride olmayan bir şeyi varsayman gerekiyorsa bunun bir varsayım olduğunu belirt. \"Yapılmadı\" ya da \"yazılmadı\" görünen günler, çıktının alındığı günden sonraya denk geliyorsa henüz yaşanmamıştır; bunları eksik sayma.",
+"",
+"Analizde şu başlıklar olsun:",
+"",
+"1. Haftanın özeti: Hafta genel olarak nasıl geçti? Kaç antrenman planlanmıştı, kaçı yapıldı, hangi günler ya da hareketler atlandı?",
+"",
+"2. Bölge ve kas analizi: Hangi vücut bölgesi (göğüs, sırt, omuz, kol, bacak, karın/bel) ve hangi kaslar bu hafta kaç set çalıştı? Bunu bir tablo ile göster. Hangi kaslar fazla, hangileri az ya da hiç çalışmadı? İtiş/çekiş ve üst/alt vücut dengesi nasıl? Haftalık set sayıları kas gelişimi için yeterli mi?",
+"",
+"3. Performans ve ilerleme: Hareket hareket ağırlık ve tekrarlara bak. Hedef tekrar aralığına ulaşılmış mı? Geçen haftaya göre ilerleme, yerinde sayma ya da gerileme var mı? Setler arasında tekrar çok düşüyorsa belirt. Hangi harekette ağırlığı artırmalı, hangisinde aynı kalmalı ya da düşürmeliyim?",
+"",
+"4. Beslenme analizi: Yazdığım yemeklerden gün gün yaklaşık kalori ve protein, karbonhidrat, yağ miktarını tahmin et (tahmin olduğunu belirt). Boyuma, kiloma ve antrenman yüküme göre bu yeterli mi, az mı, fazla mı? Protein yeterli mi? Hangi besin grupları var, hangileri eksik (sebze, meyve, lif, sağlıklı yağ, su vb.)? Az yediysem ya da fazla yediysem açıkça söyle ve ne ekleyip ne çıkarmam gerektiğini somut yiyeceklerle yaz. Yemek yazılmamış günleri tahmin etme, sadece belirt.",
+"",
+"5. Günlük notlar: Notlarda geçen uyku, ağrı, yorgunluk, motivasyon gibi şeyleri antrenman performansı ve beslenmeyle ilişkilendir. Dikkat edilmesi gereken bir işaret (sakatlık riski, aşırı yorgunluk, yetersiz dinlenme) varsa belirt.",
+"",
+"6. Program önerileri: Programda gereksiz, birbirini tekrar eden ya da verimsiz hareket var mı? Eksik kalan kas ya da hareket kalıbı var mı? \"Şunu çıkar, yerine bunu yap\" şeklinde somut değişiklikler öner ve her birinin nedenini kısaca açıkla. Hareket sırası, set/tekrar sayısı ve dinlenme günleri için de önerin varsa yaz.",
+"",
+"7. Gelecek hafta için plan: En önemli 3-5 maddeyi öncelik sırasıyla, uygulanabilir şekilde listele.",
+"",
+"Dürüst ve net ol; iyi gidenleri de kötü gidenleri de açıkça söyle. Genel geçer tavsiyeler yerine benim verime özel konuş."
+].join("\n");
 function buildExport(){
-  const wk = key(week);
-  const out = {hafta_baslangic: wk, hafta_no: isoWeek(week), birim: "kg"};
-  if (num(boyAt(wk))!=null) out.boy_cm = num(boyAt(wk));
-  if (num(bodyOf(wk).kilo)!=null) out.kilo_kg = num(bodyOf(wk).kilo);
-  out.gunler = days().map(g=>{
-      const d = dayDate(g), note = ((state.notes[wk]||{})[g.id]) || "", meal = ((state.meals[wk]||{})[g.id]) || "";
-      const o = {gun:g.gun, baslik:g.baslik||""}; if (d) o.tarih = key(d); if (note) o.not = note; if (meal) o.yemek = meal;
-      o.hareketler = g.hareketler.map(h=>({ad:h.ad, kas:h.kas||[], hedef:(h.set||3)+"x"+h.tekrar+(unit(h)==="sn"?" sn":""),
-        setler: getSets(wk,g,h).filter(s=>num(s.r)!=null && !s.oto).map(s=>{ const x={kg:num(s.kg)}; x[unit(h)==="sn"?"saniye":"tekrar"]=num(s.r); return x; })}));
-      return o; });
-  return out;
+  const wk = key(week), pk = key(addDays(week,-7)), L = [], kas = {};
+  L.push("HAFTALIK ANTRENMAN VE BESLENME KAYDI");
+  L.push("Hafta: "+isoWeek(week)+". hafta ("+wk+" – "+key(addDays(week,6))+")");
+  L.push("Bu çıktının alındığı gün: "+key(new Date()));
+  if (num(boyAt(wk))!=null) L.push("Boy: "+num(boyAt(wk))+" cm");
+  const kilo = num(bodyOf(wk).kilo), onceki = num(bodyOf(pk).kilo);
+  if (kilo!=null) L.push("Kilo: "+kilo+" kg"+(onceki!=null ? " (geçen hafta: "+onceki+" kg)" : ""));
+  days().forEach(g=>{
+    const d = dayDate(g), note = ((state.notes[wk]||{})[g.id]) || "", meal = ((state.meals[wk]||{})[g.id]) || "";
+    L.push("", "--- "+g.gun+(d ? " "+key(d) : "")+" · "+(g.baslik||"")+" ---");
+    if (!g.hareketler.length) L.push("Antrenman: yok (dinlenme günü)");
+    g.hareketler.forEach(h=>{
+      const now = fmtSets(wk,g,h), prev = fmtSets(pk,g,h);
+      L.push("- "+h.ad+(h.kas && h.kas.length ? " ["+h.kas.join(", ")+"]" : "")+" · hedef "+(h.set||3)+"x"+h.tekrar+(unit(h)==="sn"?" sn":""));
+      L.push("  Yapılan: "+(now.length ? now.join(" · ") : "yapılmadı")+(prev.length ? " | Geçen hafta: "+prev.join(" · ") : ""));
+      (h.kas||[]).forEach((m,i)=>{ const t = kas[m] = kas[m] || {ana:0, yan:0}; t[i ? "yan" : "ana"] += now.length; });
+    });
+    L.push("Günün notu: "+(note.trim() || "yazılmadı"));
+    L.push("Yenilenler: "+(meal.trim() || "yazılmadı"));
+  });
+  const ks = Object.keys(kas).sort((a,b)=>(kas[b].ana+kas[b].yan)-(kas[a].ana+kas[a].yan));
+  if (ks.length) {
+    L.push("", "--- Kas başına tamamlanan set (bu hafta) ---", "(ana: hareketin ilk yazılan kası, yardımcı: diğerleri)");
+    ks.forEach(m=>L.push("- "+m+": "+(kas[m].ana+kas[m].yan)+" set ("+kas[m].ana+" ana, "+kas[m].yan+" yardımcı)"));
+  }
+  L.push("", ANALIZ_PROMPT);
+  return L.join("\n");
 }
-function fillExport(){ $("exportText").value = JSON.stringify(buildExport(), null, 1); }
+function fillExport(){ $("exportText").value = buildExport(); }
 $("exportBtn").addEventListener("click",()=>{ fillExport(); $("exportPanel").hidden=false; $("exportMsg").textContent=""; $("exportPanel").scrollIntoView({block:"nearest"}); });
 $("exportClose").addEventListener("click",()=>{ $("exportPanel").hidden=true; });
 $("copyBtn").addEventListener("click",()=>{
