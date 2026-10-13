@@ -351,7 +351,7 @@ function render(){
       href:"https://www.google.com/search?q="+encodeURIComponent(k+" muscle")},[el("span",{text:k})]))));
     if (h.not) kids.push(el("div",{class:"hnot",text:"Not: "+h.not}));
     const prev = lastDone(g,h);
-    if (prev) { const pd = pKey(prev.d); kids.push(el("div",{class:"prev",text:"Önceki ("+prev.gun+" "+pd.getDate()+" "+MONTHS[pd.getMonth()]+"): "+prev.sets.join(" · ")})); }
+    if (prev) kids.push(el("div",{class:"prev",text:prev.sets.join(" · ")}));
     const mv = (d,label,aria)=>{ const b=el("button",{class:"mv",text:label,"aria-label":e.ad+": "+aria}), j=hi+d;
       if (j<0 || j>=g.hareketler.length) b.disabled = true;
       b.addEventListener("click",()=>{ const a=g.hareketler; const t=a[hi]; a[hi]=a[j]; a[j]=t; persist(); render(); });
