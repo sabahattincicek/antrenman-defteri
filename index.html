@@ -64,6 +64,8 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 .prev{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .rows{display:grid;grid-template-columns:28px 1fr 1fr;gap:8px;align-items:center}
 .rows .h{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.rows button.h{border:0;background:none;padding:6px 0;margin-block:-6px;text-align:left;text-decoration:underline dotted;text-underline-offset:3px}
+.rows button.h.tek{color:var(--accent);font-weight:600}
 .rows .n{font-family:var(--display);font-weight:700;font-size:18px;color:var(--muted);text-align:center}
 .rows input{width:100%;min-width:0;height:46px;border:1px solid var(--line);border-radius:10px;background:var(--sunk);color:var(--fg);font:500 18px var(--body);text-align:center;font-variant-numeric:tabular-nums}
 .rows input.filled{border-color:var(--ok)}
@@ -135,7 +137,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
 <script>
 // Hareketin kimliği "id"dir: kayıtlar id ile tutulur, ad sadece ekranda görünür. Aynı hareket hangi günde olursa olsun aynı id'yi taşır.
-const KURAL = "Her hareketin kimliği 'id' numarasıdır ve geçmiş kayıtlar id ile eşleşir. Mevcut bir hareketin id'sini değiştirme, başka bir harekete verme ve 'hareketler' listesinden hareket silme (programda kullanılmayan hareket listede kalabilir). Yeni bir hareket eklerken önce 'hareketler' listesine daha önce hiç kullanılmamış yeni bir id ile (en büyük id + 1) ekle, sonra günlerde o id ile kullan. Aynı hareket birden fazla günde yapılacaksa hepsinde aynı id'yi kullan. Günlerdeki 'ad' sadece okunurluk içindir ve listedeki adla aynı olmalıdır. Hareket adında parantez kullanma. Günlerdeki her hareketin 'not' alanı senin notun içindir: o hafta ya da o hareket için özel bir notun varsa (makine mi kablo mu, tempo, dikkat edilecek nokta, ağırlık önerisi vb.) oraya yaz, yoksa boş bırak.";
+const KURAL = "Her hareketin kimliği 'id' numarasıdır ve geçmiş kayıtlar id ile eşleşir. Mevcut bir hareketin id'sini değiştirme, başka bir harekete verme ve 'hareketler' listesinden hareket silme (programda kullanılmayan hareket listede kalabilir). Yeni bir hareket eklerken önce 'hareketler' listesine daha önce hiç kullanılmamış yeni bir id ile (en büyük id + 1) ekle, sonra günlerde o id ile kullan. Aynı hareket birden fazla günde yapılacaksa hepsinde aynı id'yi kullan. Günlerdeki 'ad' sadece okunurluk içindir ve listedeki adla aynı olmalıdır. Hareket adında parantez kullanma. Ağırlığın her kola ya da ele ayrı yüklendiği hareketlerde (dumbbell, kolları birbirinden bağımsız makineler) listede harekete \"tek\": true yaz; bu hareketlerde girilen kg tek kolun ağırlığıdır. Günlerdeki her hareketin 'not' alanı senin notun içindir: o hafta ya da o hareket için özel bir notun varsa (makine mi kablo mu, tempo, dikkat edilecek nokta, ağırlık önerisi vb.) oraya yaz, yoksa boş bırak.";
 function H(id, not){ const h = {id, set:3, tekrar:"8-12"}; if (not) h.not = not; return h; }
 const DEFAULT_PROGRAM = {hareketler:[
   {id:1,ad:"Shoulder press makinesi",kas:["Anterior deltoid","Lateral deltoid","Triceps brachii"]},
@@ -313,7 +315,10 @@ function render(){
     const sets = getSets(wk,g,h), u = unit(h), e = ex(h);
     let last = sets.length; while (last>0 && num(sets[last-1].kg)==null && num(sets[last-1].r)==null) last--;
     const n = Math.max(h.set||3, last);
-    const rows = el("div",{class:"rows"},[el("span",{class:"h",text:"Set"}),el("span",{class:"h",text:"Kg"}),el("span",{class:"h",text:u==="sn"?"Saniye":"Tekrar"})]);
+    // Kg başlığına dokununca: ağırlık her kola ayrı yükleniyorsa (dumbbell, kolları bağımsız makine) girilen kg tek kolundur
+    const kgh = el("button",{class:"h"+(e.tek?" tek":""),text:e.tek?"Kg (tek kol)":"Kg","aria-pressed":String(!!e.tek),"aria-label":e.ad+": ağırlık tek kol için mi"});
+    kgh.addEventListener("click",()=>{ if (e.tek) delete e.tek; else e.tek = true; persist(); render(); });
+    const rows = el("div",{class:"rows"},[el("span",{class:"h",text:"Set"}),kgh,el("span",{class:"h",text:u==="sn"?"Saniye":"Tekrar"})]);
     const paint = (j, skip) => { const t = getSets(wk,g,h)[j] || {};
       ["kg","r"].forEach(f=>{ const x = $("in-"+dayIdx+"-"+hi+"-"+j+"-"+f); if (!x) return;
         if (x !== skip) x.value = t[f] || "";
@@ -403,7 +408,7 @@ function buildExport(){
     if (!g.hareketler.length) L.push("Antrenman: yok (dinlenme günü)");
     g.hareketler.forEach(h=>{
       const now = fmtSets(wk,g,h), prev = lastDone(g,h), e = ex(h);
-      L.push("- #"+h.id+" "+e.ad+(e.kas && e.kas.length ? " ["+e.kas.join(", ")+"]" : "")+" · hedef "+(h.set||3)+"x"+h.tekrar+(unit(h)==="sn"?" sn":""));
+      L.push("- #"+h.id+" "+e.ad+(e.kas && e.kas.length ? " ["+e.kas.join(", ")+"]" : "")+" · hedef "+(h.set||3)+"x"+h.tekrar+(unit(h)==="sn"?" sn":"")+(e.tek?" · kg tek kol başına (her kola ayrı yüklenen ağırlık)":""));
       if (h.not) L.push("  Program notu: "+h.not);
       L.push("  Yapılan: "+(now.length ? now.join(" · ") : "yapılmadı")+(prev ? " | Önceki ("+prev.d+" "+prev.gun+"): "+prev.sets.join(" · ") : ""));
       (e.kas||[]).forEach((m,i)=>{ const t = kas[m] = kas[m] || {ana:0, yan:0}; t[i ? "yan" : "ana"] += now.length; });
@@ -447,6 +452,7 @@ function validate(p){
       if (!Array.isArray(e.kas)) throw new Error("\""+e.ad+"\" için \"kas\" bir liste olmalı. Örnek: [\"Göğüs\",\"Triceps\"]");
       e.kas = e.kas.map(k=>String(k).trim()).filter(Boolean);
     }
+    if (e.tek) e.tek = true; else delete e.tek;
     cat[id] = e; adlar[k] = id;
   });
   const ids = {};
