@@ -46,35 +46,43 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
 .body{display:flex;gap:10px}
 .body label{flex:1;min-width:0;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);white-space:nowrap}
-.body input{flex:1;min-width:0;height:46px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);font:500 18px var(--body);text-align:center;font-variant-numeric:tabular-nums}
+.body input,.kilo input{flex:1;min-width:0;height:46px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);font:500 18px var(--body);text-align:center;font-variant-numeric:tabular-nums}
+.body .btn{flex:none;min-height:46px;padding:0 14px;color:var(--accent)}
+.kilos{display:flex;flex-direction:column;gap:6px;margin-top:-8px}
+.kilo{display:grid;grid-template-columns:1fr 120px 44px;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+.kilo input{height:40px}
+.kilo .mv{height:40px}
 .dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
 .dayhead h2{margin:0;font-family:var(--display);font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:.03em;text-wrap:balance}
 .dayhead span{font-size:13px;color:var(--muted);white-space:nowrap}
 .list{display:flex;flex-direction:column;gap:12px}
-.ex{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
 .ex header{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
-.ex h3{margin:0;font-size:17px;font-weight:600;min-width:0}
+.ex h3{margin:0;font-size:16px;font-weight:600;min-width:0}
 .ex h3 a{color:inherit;text-decoration:underline;text-decoration-color:var(--accent);text-decoration-thickness:2px;text-underline-offset:4px}
 .ex h3 a::after{content:" ↗";color:var(--accent);font-weight:500}
 .ex .goal{font-size:13px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
-.kas{display:flex;flex-wrap:wrap;gap:0 6px;margin-block:-10px -8px}
-.kas a{display:inline-flex;align-items:center;min-height:44px;color:inherit;text-decoration:none}
-.kas span{font-size:13px;font-weight:500;padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--sunk)}
-.hnot{font-size:14px;white-space:pre-wrap}
+.kas{display:flex;flex-wrap:wrap;gap:0 4px;margin-block:-6px -4px}
+.kas a{display:inline-flex;align-items:center;min-height:32px;color:inherit;text-decoration:none}
+.kas span{font-size:12px;font-weight:500;padding:2px 8px;border:1px solid var(--line);border-radius:999px;background:var(--sunk)}
+.hnot{font-size:13px;white-space:pre-wrap}
 .prev{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
-.rows{display:grid;grid-template-columns:28px 1fr 1fr;gap:8px;align-items:center}
+.rows{display:grid;grid-template-columns:24px 1fr 1fr;gap:6px;align-items:center}
 .rows .h{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
 .rows button.h{border:0;background:none;padding:6px 0;margin-block:-6px;text-align:left;text-decoration:underline dotted;text-underline-offset:3px}
 .rows button.h.tek{color:var(--accent);font-weight:600}
-.rows .n{font-family:var(--display);font-weight:700;font-size:18px;color:var(--muted);text-align:center}
-.rows input{width:100%;min-width:0;height:46px;border:1px solid var(--line);border-radius:10px;background:var(--sunk);color:var(--fg);font:500 18px var(--body);text-align:center;font-variant-numeric:tabular-nums}
+.rows .n{font-family:var(--display);font-weight:700;font-size:17px;color:var(--muted);text-align:center}
+.rows input{width:100%;min-width:0;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--sunk);color:var(--fg);font:500 17px var(--body);text-align:center;font-variant-numeric:tabular-nums}
 .rows input.filled{border-color:var(--ok)}
 .rows input.oto{color:var(--muted);border-style:dashed;opacity:.6}
 .foot{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .mvs{display:flex;gap:6px}
-.mv{width:44px;height:40px;border:1px solid var(--line);background:var(--sunk);border-radius:10px;font-size:18px;line-height:1}
+.mv{width:44px;height:34px;border:1px solid var(--line);background:var(--sunk);border-radius:10px;font-size:17px;line-height:1}
 .mv:disabled{opacity:.3;cursor:default}
-.add{border:0;background:none;color:var(--accent);font-weight:600;font-size:14px;padding:6px 0}
+.add{border:0;background:none;color:var(--accent);font-weight:600;font-size:14px;padding:4px 0}
+.prevnote{font-size:14px;color:var(--muted)}
+.prevnote summary{cursor:pointer;font-weight:600;padding-block:6px}
+.prevnote div{white-space:pre-wrap;padding-top:4px}
 .notel{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
 .note{width:100%;min-height:120px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);font:16px var(--body);padding:12px;resize:vertical;overflow:hidden}
 
@@ -103,13 +111,16 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
   <div class="body">
     <label>Boy (cm)<input id="boy" type="text" inputmode="decimal" autocomplete="off" placeholder="cm"></label>
-    <label>Kilo (kg)<input id="kilo" type="text" inputmode="decimal" autocomplete="off" placeholder="kg"></label>
+    <button class="btn" id="kiloAdd">+ Kilo ekle</button>
   </div>
+  <div class="kilos" id="kilos"></div>
+  <details class="prevnote" id="prevNoteBox" hidden><summary>Geçen haftanın notu</summary><div id="prevNoteText"></div></details>
 
   <div class="dayhead"><h2 id="dayTitle"></h2><span id="dayDate"></span></div>
   <div class="list" id="list"></div>
   <label class="notel">Günün notu<textarea class="note" id="dayNote" placeholder="İsteğe bağlı: uyku, ağrı, kolay/zor geldi…"></textarea></label>
   <label class="notel">Bugün ne yedim<textarea class="note" id="dayMeal" placeholder="İsteğe bağlı: kahvaltı, öğle, akşam, ara öğün…"></textarea></label>
+  <label class="notel">Haftalık not (yapay zeka analizi)<textarea class="note" id="weekNote" placeholder="Haftalık analizden sonra yapay zekanın yazdığı HAFTALIK NOT kısmını buraya yapıştır."></textarea></label>
 
   <div class="tools">
     <button class="btn primary" id="exportBtn">Haftalık analiz</button>
@@ -123,7 +134,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
     <div class="panel" id="progPanel" hidden>
       <textarea id="progText" spellcheck="false"></textarea>
       <div class="rowb"><button class="btn primary" id="progSave">Programı kaydet</button><button class="btn" id="progCopy">Kopyala</button><button class="btn" id="progClose">Kapat</button></div>
-      <p class="msg" id="progMsg">Kayıtlar hareketin id'siyle tutulur. Yeni hareket eklerken önce en üstteki listeye yeni bir id ile ekle; mevcut id'leri değiştirme. Yapay zekanın verdiği yeni programı kutuya yapıştırıp kaydedebilirsin.</p>
+      <p class="msg" id="progMsg">Kaydettiğin program açık olan haftadan itibaren geçerli olur; önceki haftalar kendi programıyla kalır. Kayıtlar hareketin id'siyle tutulur. Yeni hareket eklerken önce en üstteki listeye yeni bir id ile ekle; mevcut id'leri değiştirme. Yapay zekanın verdiği yeni programı kutuya yapıştırıp kaydedebilirsin.</p>
     </div>
     <button class="btn" id="bakBtn">Tüm kayıtları yedekle / geri yükle</button>
     <div class="panel" id="bakPanel" hidden>
@@ -172,7 +183,9 @@ const MONTHS = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","K
 const LS = "antrenman-defteri-v1";
 const $ = id => document.getElementById(id);
 
-let state = {program: JSON.parse(JSON.stringify(DEFAULT_PROGRAM)), logs:{}, notes:{}, updatedAt:0};
+// Her haftanın kendi programı var: programs[pazartesi] = o haftadan itibaren geçerli program. ILK: ilk programın anahtarı, bütün eski haftaları kapsar.
+const ILK = "0000-00-00";
+let state = {programs: {[ILK]: JSON.parse(JSON.stringify(DEFAULT_PROGRAM))}, logs:{}, notes:{}, updatedAt:0};
 // Eski sürüm kayıtları hareket adıyla tutuyordu: açılışta bir kez id'ye çevrilir. Çevirmeden önceki hali ayrı anahtarda saklanır.
 function adKey(ad){ const t = String(ad).toLocaleLowerCase("tr"); return t.replace(/\([^)]*\)/g,"").replace(/\s+/g," ").trim() || t.trim(); }
 const ESKI_AD = {"hack squat veya leg press":"Leg press"}; // eski programda ayrı yazılmış, aynı hareket
@@ -200,18 +213,26 @@ function idyeCevir(s){
   p.hareketler = list;
   return s;
 }
-try { const raw = localStorage.getItem(LS), s = JSON.parse(raw); if (s && s.program && s.logs) {
-  if (!Array.isArray(s.program.hareketler)) { try { localStorage.setItem(LS+"-adli-yedek", raw); } catch(e){} idyeCevir(s); }
+try { const raw = localStorage.getItem(LS), s = JSON.parse(raw); if (s && (s.programs || s.program) && s.logs) {
+  if (!s.programs && !Array.isArray(s.program.hareketler)) { try { localStorage.setItem(LS+"-adli-yedek", raw); } catch(e){} idyeCevir(s); }
   state = s; } } catch(e){}
+// eski kayıtlarda tek program vardı: bütün haftaların programı olur. "program" alanı en son programın kopyası olarak yazılmaya devam eder
+// (önbellekteki eski sürüm açılırsa kayıtları boş sanmasın diye); okunmaz.
+if (!state.programs) state.programs = {[ILK]: state.program};
 if (!state.notes) state.notes = {};
-if (!state.body) state.body = {}; // eski kayıtlarda yok: body[hafta] = {boy:"", kilo:""}
+if (!state.weekNotes) state.weekNotes = {}; // weekNotes[hafta] = yapay zekanın haftalık notu
+if (!state.body) state.body = {}; // body[hafta] = {boy:"", kilolar:[{d:"gün", kg:""}]}
+// eski kayıtlarda haftada tek kilo vardı (body[hafta].kilo): o haftanın pazartesisine ölçüm olarak geçer
+function kiloCevir(s){ Object.keys(s.body||{}).forEach(wk=>{ const b = s.body[wk]; if (!b) return;
+  if (b.kilo) (b.kilolar = b.kilolar||[]).push({d:wk, kg:b.kilo}); delete b.kilo; }); return s; }
+kiloCevir(state);
 // Kaslar programda ne yazıyorsa o (otomatik ekleme yok). Tek istisna: önceki sürümün yazdığı Türkçe adlar literatürdeki ada çevrilir.
 const KAS_TR = {"Göğüs":"Pectoralis major","Üst göğüs":"Pectoralis major (clavicular)","Ön omuz":"Anterior deltoid","Yan omuz":"Lateral deltoid",
   "Arka omuz":"Posterior deltoid","Triceps":"Triceps brachii","Biceps":"Biceps brachii","Kanat":"Latissimus dorsi","Orta sırt":"Rhomboids",
   "Ön kol":"Brachioradialis","Ön bacak":"Quadriceps","Arka bacak":"Hamstrings","Kalça":"Gluteus maximus","Baldır":"Gastrocnemius",
   "Karın":"Rectus abdominis","Bel":"Erector spinae"};
 function kasAdlari(p){ try { p.hareketler.forEach(h=>{ if (Array.isArray(h.kas)) h.kas = h.kas.map(k=>KAS_TR[k]||k); }); } catch(e){} return p; }
-kasAdlari(state.program);
+Object.keys(state.programs).forEach(k=>kasAdlari(state.programs[k]));
 if (!state.meals) state.meals = {}; // eski kayıtlarda yok: meals[hafta][gun.id] = "metin"
 
 // ---- tarih ----
@@ -225,8 +246,15 @@ function dayDate(g){ const o=wdOf(g); return o==null ? null : addDays(week,o); }
 // Ekranda 7 gün: programda olmayan hafta günleri "Dinlenme" olarak araya girer. Programa yazılmaz;
 // not ve yemek kayıtları bu id'lerle tutulur (programa sonradan "Per" günü eklenirse id yine "per" olur).
 const WEEK = [["pzt","Pzt"],["sal","Sal"],["car","Çar"],["per","Per"],["cum","Cum"],["cmt","Cmt"],["paz","Paz"]];
+// haftanın programı: o haftada ya da daha önce kaydedilen en son program
+function progKey(wk){ const ks = Object.keys(state.programs).sort(), o = ks.filter(k=>k<=wk); return o.length ? o[o.length-1] : ks[0]; }
+function prog(){ return state.programs[progKey(key(week))]; }
+// sıra ya da tek kol değişikliği: bu haftaya kopya açılır, değişiklik bu haftadan itibaren geçerli olur, eski haftalar değişmez
+function ownProg(){ const wk = key(week); if (progKey(wk)!==wk) state.programs[wk] = JSON.parse(JSON.stringify(prog())); return state.programs[wk]; }
+// bütün programlardaki hareketler (aynı id'de en son ad): id'ler programlar arasında ortaktır
+function katalog(){ const c = {}; Object.keys(state.programs).sort().forEach(k=>state.programs[k].hareketler.forEach(e=>{ c[e.id] = e; })); return Object.keys(c).map(id=>c[id]); }
 function days(){
-  const out = state.program.gunler.slice();
+  const out = prog().gunler.slice();
   WEEK.forEach(([id,gun],w)=>{
     if (out.some(g=>wdOf(g)===w || g.id===id)) return;
     const at = out.findIndex(g=>{ const o=wdOf(g); return o!=null && o>w; });
@@ -243,12 +271,13 @@ let dayIdx = 0;
 function persist(){
   state.updatedAt = Date.now();
   const ks = Object.keys(state.logs).sort();
-  while (ks.length > 40) { const k=ks.shift(); delete state.logs[k]; delete state.notes[k]; delete state.meals[k]; }
+  while (ks.length > 40) { const k=ks.shift(); delete state.logs[k]; delete state.notes[k]; delete state.meals[k]; delete state.weekNotes[k]; }
+  const ps = Object.keys(state.programs).sort(); state.program = state.programs[ps[ps.length-1]];
   try { localStorage.setItem(LS, JSON.stringify(state)); } catch(e){}
 }
 
 // ---- veri erişimi ----
-function ex(h){ return state.program.hareketler.find(e=>e.id===h.id) || {ad:"?", kas:[]}; } // günün satırı -> listedeki hareket (ad, kas, birim)
+function ex(h){ return prog().hareketler.find(e=>e.id===h.id) || {ad:"?", kas:[]}; } // günün satırı -> listedeki hareket (ad, kas, birim)
 function getSets(wk, g, h){ return (((state.logs[wk]||{})[g.id]||{})[h.id]) || []; }
 function setVal(g, h, i, field, v){
   const wk = key(week);
@@ -261,6 +290,9 @@ function num(v){ const n = parseFloat(String(v==null?"":v).replace(",", ".")); r
 function filledCount(wk, g){ let c=0; for (const h of g.hareketler) for (const s of getSets(wk,g,h)) if (num(s.r)!=null && !s.oto) c++; return c; }
 function targetCount(g){ return g.hareketler.reduce((n,h)=>n+(h.set||3),0); }
 function bodyOf(wk){ return state.body[wk] || {}; }
+function kilolar(wk){ return bodyOf(wk).kilolar || []; }
+function olculen(wk){ return kilolar(wk).filter(k=>num(k.kg)!=null); }
+function ortalama(a){ return a.length ? Math.round(a.reduce((s,k)=>s+num(k.kg),0)/a.length*10)/10 : null; }
 // boy her hafta değişmez: bu hafta yazılmadıysa en son yazılan geçerli
 function boyAt(wk){ if (bodyOf(wk).boy) return bodyOf(wk).boy;
   const ks = Object.keys(state.body).filter(k=>k<wk && state.body[k].boy).sort(); return ks.length ? state.body[ks[ks.length-1]].boy : ""; }
@@ -270,6 +302,7 @@ function fmtArr(sets, h){ return sets.filter(s=>num(s.r)!=null && !s.oto).map(s=
 function fmtSets(wk, g, h){ return fmtArr(getSets(wk,g,h), h); }
 // hareketin bu günden önceki en son seansı: hangi günde yapıldıysa (aynı haftanın daha erken bir günü de olabilir)
 function pKey(k){ const a = k.split("-"); return new Date(+a[0], a[1]-1, +a[2]); }
+function gunAdi(k){ return WEEK[(pKey(k).getDay()+6)%7][1]; }
 function lastDone(g, h){
   const ds = days(), cur = key(dayDate(g) || week); let best = null;
   Object.keys(state.logs).forEach(wk=>{ if (wk > key(week)) return; const W = state.logs[wk]||{};
@@ -277,7 +310,7 @@ function lastDone(g, h){
       const x = ds.find(d=>d.id===gid), o = x ? wdOf(x) : (gid in WD ? WD[gid] : null);
       const d = key(o==null ? pKey(wk) : addDays(pKey(wk),o));
       if (d < cur && (!best || d > best.d)) best = {d, sets}; }); });
-  if (best) best.gun = WEEK[(pKey(best.d).getDay()+6)%7][1];
+  if (best) best.gun = gunAdi(best.d);
   return best;
 }
 
@@ -306,7 +339,9 @@ function renderHeader(){
 function render(){
   renderHeader(); renderTabs();
   const g = days()[dayIdx], wk = key(week);
-  $("boy").value = boyAt(wk); $("kilo").value = bodyOf(wk).kilo || "";
+  $("boy").value = boyAt(wk); renderKilo();
+  const pn = (state.weekNotes[key(addDays(week,-7))] || "").trim();
+  $("prevNoteBox").hidden = !pn; $("prevNoteText").textContent = pn;
   $("dayTitle").textContent = g.baslik || g.gun;
   const dd = dayDate(g); $("dayDate").textContent = dd ? dd.getDate()+" "+MONTHS[dd.getMonth()] : "";
   const list = $("list"); list.textContent = "";
@@ -317,7 +352,7 @@ function render(){
     const n = Math.max(h.set||3, last);
     // Kg başlığına dokununca: ağırlık her kola ayrı yükleniyorsa (dumbbell, kolları bağımsız makine) girilen kg tek kolundur
     const kgh = el("button",{class:"h"+(e.tek?" tek":""),text:e.tek?"Kg (tek kol)":"Kg","aria-pressed":String(!!e.tek),"aria-label":e.ad+": ağırlık tek kol için mi"});
-    kgh.addEventListener("click",()=>{ if (e.tek) delete e.tek; else e.tek = true; persist(); render(); });
+    kgh.addEventListener("click",()=>{ const x = ownProg().hareketler.find(z=>z.id===h.id); if (x) { if (x.tek) delete x.tek; else x.tek = true; } persist(); render(); });
     const rows = el("div",{class:"rows"},[el("span",{class:"h",text:"Set"}),kgh,el("span",{class:"h",text:u==="sn"?"Saniye":"Tekrar"})]);
     const paint = (j, skip) => { const t = getSets(wk,g,h)[j] || {};
       ["kg","r"].forEach(f=>{ const x = $("in-"+dayIdx+"-"+hi+"-"+j+"-"+f); if (!x) return;
@@ -359,15 +394,29 @@ function render(){
     if (prev) kids.push(el("div",{class:"prev",text:prev.sets.join(" · ")}));
     const mv = (d,label,aria)=>{ const b=el("button",{class:"mv",text:label,"aria-label":e.ad+": "+aria}), j=hi+d;
       if (j<0 || j>=g.hareketler.length) b.disabled = true;
-      b.addEventListener("click",()=>{ const a=g.hareketler; const t=a[hi]; a[hi]=a[j]; a[j]=t; persist(); render(); });
+      b.addEventListener("click",()=>{ const a=ownProg().gunler.find(x=>x.id===g.id).hareketler; const t=a[hi]; a[hi]=a[j]; a[j]=t; persist(); render(); });
       return b; };
     kids.push(rows, el("div",{class:"foot"},[add, el("span",{class:"mvs"},[mv(-1,"↑","yukarı taşı"), mv(1,"↓","aşağı taşı")])]));
     list.appendChild(el("section",{class:"ex"},kids));
   });
   $("dayNote").value = ((state.notes[wk]||{})[g.id]) || "";
   $("dayMeal").value = ((state.meals[wk]||{})[g.id]) || "";
-  fitNote($("dayNote")); fitNote($("dayMeal"));
+  $("weekNote").value = state.weekNotes[wk] || "";
+  fitNote($("dayNote")); fitNote($("dayMeal")); fitNote($("weekNote"));
   if (!$("exportPanel").hidden) fillExport();
+}
+// haftanın kilo ölçümleri: her satır bir gün ve kg
+function renderKilo(){
+  const wk = key(week), box = $("kilos"); box.textContent = "";
+  kilolar(wk).forEach((k,i)=>{
+    const d = pKey(k.d), ad = d.getDate()+" "+MONTHS[d.getMonth()]+" "+gunAdi(k.d);
+    const inp = el("input",{id:"kilo-"+i,type:"text",inputmode:"decimal",autocomplete:"off",placeholder:"kg","aria-label":ad+" kilo"});
+    inp.value = k.kg || "";
+    inp.addEventListener("input",()=>{ k.kg = inp.value.trim(); persist(); if (!$("exportPanel").hidden) fillExport(); });
+    const del = el("button",{class:"mv",text:"×","aria-label":ad+" kilo ölçümünü sil"});
+    del.addEventListener("click",()=>{ const a = kilolar(wk); a.splice(a.indexOf(k),1); persist(); renderKilo(); if (!$("exportPanel").hidden) fillExport(); });
+    box.appendChild(el("div",{class:"kilo"},[el("span",{text:ad+" · kg"}), inp, del]));
+  });
 }
 
 // ---- dışa aktarım ----
@@ -392,6 +441,8 @@ const ANALIZ_PROMPT = [
 "",
 "7. Gelecek hafta için plan: En önemli 3-5 maddeyi öncelik sırasıyla, uygulanabilir şekilde listele.",
 "",
+"8. Haftalık not: En sonda \"HAFTALIK NOT\" başlığıyla, uygulamadaki haftalık not kutusuna yapıştıracağım kısa bir not yaz (en fazla 10 madde): haftanın en önemli tespitleri ve gelecek hafta neyi değiştireceğim. Ağırlık artırılacak ya da düşürülecek hareketleri adıyla ve hedef kg ile yaz. Kayıtta \"Geçen haftanın yapay zeka notu\" varsa, o nottaki önerilere uyulup uyulmadığını da değerlendir.",
+"",
 "Dürüst ve net ol; iyi gidenleri de kötü gidenleri de açıkça söyle. Genel geçer tavsiyeler yerine benim verime özel konuş."
 ].join("\n");
 function buildExport(){
@@ -400,8 +451,9 @@ function buildExport(){
   L.push("Hafta: "+isoWeek(week)+". hafta ("+wk+" – "+key(addDays(week,6))+")");
   L.push("Bu çıktının alındığı gün: "+key(new Date()));
   if (num(boyAt(wk))!=null) L.push("Boy: "+num(boyAt(wk))+" cm");
-  const kilo = num(bodyOf(wk).kilo), onceki = num(bodyOf(pk).kilo);
-  if (kilo!=null) L.push("Kilo: "+kilo+" kg"+(onceki!=null ? " (geçen hafta: "+onceki+" kg)" : ""));
+  const kl = olculen(wk), onceki = ortalama(olculen(pk));
+  if (kl.length) L.push("Kilo ölçümleri: "+kl.map(k=>k.d+" "+gunAdi(k.d)+": "+num(k.kg)+" kg").join(" · ")+
+    (kl.length>1 ? " (ortalama "+ortalama(kl)+" kg)" : "")+(onceki!=null ? " | geçen hafta ortalama: "+onceki+" kg" : ""));
   days().forEach(g=>{
     const d = dayDate(g), note = ((state.notes[wk]||{})[g.id]) || "", meal = ((state.meals[wk]||{})[g.id]) || "";
     L.push("", "--- "+g.gun+(d ? " "+key(d) : "")+" · "+(g.baslik||"")+" ---");
@@ -421,6 +473,8 @@ function buildExport(){
     L.push("", "--- Kas başına tamamlanan set (bu hafta) ---", "(ana: hareketin ilk yazılan kası, yardımcı: diğerleri)");
     ks.forEach(m=>L.push("- "+m+": "+(kas[m].ana+kas[m].yan)+" set ("+kas[m].ana+" ana, "+kas[m].yan+" yardımcı)"));
   }
+  const pn = (state.weekNotes[pk] || "").trim();
+  if (pn) L.push("", "--- Geçen haftanın yapay zeka notu ---", pn);
   L.push("", ANALIZ_PROMPT);
   return L.join("\n");
 }
@@ -484,7 +538,7 @@ function progJSON(p, gunler){
       (g.hareketler.length ? "\n"+g.hareketler.map(h=>row(Object.assign({id:h.id, ad:adOf(h.id)}, h, {not:h.not||""}),"   ")).join(",\n")+"\n  " : "")+"]}").join(",\n")+"\n ]\n}";
 }
 let progOnay = null;
-$("progBtn").addEventListener("click",()=>{ $("progText").value = progJSON(state.program, days()); $("progPanel").hidden=false; $("progPanel").scrollIntoView({block:"nearest"}); });
+$("progBtn").addEventListener("click",()=>{ $("progText").value = progJSON(prog(), days()); $("progPanel").hidden=false; $("progPanel").scrollIntoView({block:"nearest"}); });
 $("progClose").addEventListener("click",()=>{ $("progPanel").hidden=true; });
 $("progCopy").addEventListener("click",()=>{
   const t = $("progText"), m = $("progMsg");
@@ -492,7 +546,7 @@ $("progCopy").addEventListener("click",()=>{
   try { navigator.clipboard.writeText(t.value).then(()=>{ m.className="msg ok"; m.textContent="Program kopyalandı. Yapay zekaya yapıştırabilirsin."; }, fallback); } catch(e){ fallback(); }
 });
 $("progSave").addEventListener("click",()=>{
-  const m = $("progMsg"), txt = $("progText").value, eski = state.program.hareketler;
+  const m = $("progMsg"), txt = $("progText").value, eski = katalog();
   let p, degisen = [];
   try {
     p = kasAdlari(validate(JSON.parse(txt)));
@@ -507,9 +561,13 @@ $("progSave").addEventListener("click",()=>{
   // mevcut bir id'nin adı değişiyorsa: yeniden adlandırma mı, yanlışlıkla başka harekete verilmiş id mi? İkinci dokunuşla onaylanır.
   if (degisen.length && progOnay !== txt) { progOnay = txt; m.className="msg err";
     m.textContent = "Henüz kaydedilmedi. Şu id'lerin adı değişiyor: "+degisen.join("; ")+". Aynı hareketin yeni adıysa tekrar \"Programı kaydet\"e dokun; eski kayıtlar bu adla devam eder. Farklı bir hareketse ona yeni bir id ver."; return; }
-  progOnay = null; state.program = p;
+  // program açık olan haftadan itibaren geçerli; önceki haftalar kendi programıyla kalır
+  progOnay = null; const wk = key(week); state.programs[wk] = p;
+  const sonra = Object.keys(state.programs).some(k=>k>wk);
   if (dayIdx >= days().length) dayIdx = 0;
-  persist(); render(); m.className="msg ok"; m.textContent="Program kaydedildi.";
+  persist(); render(); m.className="msg ok";
+  m.textContent = "Program kaydedildi: "+isoWeek(week)+". haftadan itibaren geçerli, önceki haftalar değişmedi."+
+    (sonra ? " Sonraki haftalardan birinde ayrıca kaydedilmiş bir program var; o hafta ve sonrası kendi programıyla kaldı." : "");
 });
 
 // ---- yedek ----
@@ -527,21 +585,30 @@ $("bakCopy").addEventListener("click",()=>{
 $("bakLoad").addEventListener("click",()=>{
   let s;
   try { s = JSON.parse($("bakText").value); if (!s || typeof s.logs!=="object" || !s.logs) throw new Error("Bu bir yedek değil: \"logs\" alanı yok.");
-    if (s.program && Array.isArray(s.program.gunler) && !Array.isArray(s.program.hareketler)) idyeCevir(s); // eski (adla tutulan) yedek
-    validate(s.program); }
+    if (!s.programs || typeof s.programs!=="object") { // tek programlı eski yedek
+      if (s.program && Array.isArray(s.program.gunler) && !Array.isArray(s.program.hareketler)) idyeCevir(s); // eski (adla tutulan) yedek
+      s.programs = {[ILK]: s.program}; }
+    Object.keys(s.programs).forEach(k=>validate(s.programs[k])); }
   catch(e){ disarm(); bakSay("err", "Geri yüklenmedi: "+(e instanceof SyntaxError ? "metin bozuk ya da eksik kopyalanmış." : e.message)); return; }
   if (!armed) { armed=true; $("bakLoad").textContent="Eminim, üzerine yaz"; bakSay("", "Bu telefondaki mevcut kayıtların yerine "+Object.keys(s.logs).length+" haftalık yedek gelecek. Onaylamak için tekrar dokun."); return; }
-  state = {program:kasAdlari(s.program), logs:s.logs, notes:s.notes||{}, meals:s.meals||{}, body:s.body||{}, updatedAt:0};
+  Object.keys(s.programs).forEach(k=>kasAdlari(s.programs[k]));
+  state = kiloCevir({programs:s.programs, logs:s.logs, notes:s.notes||{}, meals:s.meals||{}, body:s.body||{}, weekNotes:s.weekNotes||{}, updatedAt:0});
   if (dayIdx >= days().length) dayIdx = 0;
   disarm(); persist(); render(); bakSay("ok","Yedek geri yüklendi.");
 });
 
-$("prevWeek").addEventListener("click",()=>{ week = addDays(week,-7); render(); });
-$("nextWeek").addEventListener("click",()=>{ week = addDays(week,7); render(); });
+// haftalar farklı programda olabilir: gün sayısı değişirse ilk güne dön
+$("prevWeek").addEventListener("click",()=>{ week = addDays(week,-7); if (dayIdx >= days().length) dayIdx = 0; render(); });
+$("nextWeek").addEventListener("click",()=>{ week = addDays(week,7); if (dayIdx >= days().length) dayIdx = 0; render(); });
 // not kutusu yazdıkça içeriğe göre uzar (border-box: çerçeve payı eklenir)
 function fitNote(t){ t.style.height = "auto"; t.style.height = (t.scrollHeight + t.offsetHeight - t.clientHeight) + "px"; }
 $("dayNote").addEventListener("input",()=>{ const wk=key(week), g=days()[dayIdx]; (state.notes[wk]=state.notes[wk]||{})[g.id] = $("dayNote").value; persist(); fitNote($("dayNote")); });
-["boy","kilo"].forEach(f=>$(f).addEventListener("input",()=>{ const wk=key(week); (state.body[wk]=state.body[wk]||{})[f] = $(f).value.trim(); persist(); if (!$("exportPanel").hidden) fillExport(); }));
+$("boy").addEventListener("input",()=>{ const wk=key(week); (state.body[wk]=state.body[wk]||{}).boy = $("boy").value.trim(); persist(); if (!$("exportPanel").hidden) fillExport(); });
+// yeni ölçüm seçili günün tarihiyle eklenir
+$("kiloAdd").addEventListener("click",()=>{ const wk=key(week), b = state.body[wk] = state.body[wk]||{}, a = b.kilolar = b.kilolar||[];
+  const k = {d:key(dayDate(days()[dayIdx]) || week), kg:""}; a.push(k); a.sort((x,y)=>x.d<y.d?-1:x.d>y.d?1:0);
+  persist(); renderKilo(); const i = $("kilo-"+a.indexOf(k)); if (i) i.focus(); });
+$("weekNote").addEventListener("input",()=>{ state.weekNotes[key(week)] = $("weekNote").value; persist(); fitNote($("weekNote")); });
 $("dayMeal").addEventListener("input",()=>{ const wk=key(week), g=days()[dayIdx]; (state.meals[wk]=state.meals[wk]||{})[g.id] = $("dayMeal").value; persist(); fitNote($("dayMeal")); });
 
 render();
