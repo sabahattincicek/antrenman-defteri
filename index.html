@@ -154,7 +154,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 
 <script>
 // Hareketin kimliği "id"dir: kayıtlar id ile tutulur, ad sadece ekranda görünür. Aynı hareket hangi günde olursa olsun aynı id'yi taşır.
-const KURAL = "Her hareketin kimliği 'id' numarasıdır ve geçmiş kayıtlar id ile eşleşir. Mevcut bir hareketin id'sini değiştirme, başka bir harekete verme ve 'hareketler' listesinden hareket silme (programda kullanılmayan hareket listede kalabilir). Yeni bir hareket eklerken önce 'hareketler' listesine daha önce hiç kullanılmamış yeni bir id ile (en büyük id + 1) ekle, sonra günlerde o id ile kullan. Aynı hareket birden fazla günde yapılacaksa hepsinde aynı id'yi kullan. Günlerdeki 'ad' sadece okunurluk içindir ve listedeki adla aynı olmalıdır. Hareket adında parantez kullanma. Ağırlığın her kola ya da ele ayrı yüklendiği hareketlerde (dumbbell, kolları birbirinden bağımsız makineler) listede harekete \"tek\": true yaz; bu hareketlerde girilen kg tek kolun ağırlığıdır. Günlerdeki her hareketin 'not' alanı senin notun içindir: o hafta ya da o hareket için özel bir notun varsa (makine mi kablo mu, tempo, dikkat edilecek nokta, ağırlık önerisi vb.) oraya yaz, yoksa boş bırak. Günlerdeki her hareketin 'oneri' alanına o hafta için set set önerdiğin ağırlığı ve tekrarı yaz, uygulama bunları set kutularında soluk gösterir ve ben tek dokunuşla onaylarım. Örnek: \"oneri\": [{\"kg\":40,\"r\":10},{\"kg\":40,\"r\":9},{\"kg\":40,\"r\":8}]. Her set için bir eleman yaz; 'kg' ve 'r' tek sayı olmalı, aralık yazma (\"8-12\" olmaz). Ağırlıksız harekette 'kg' yazma; süreli harekette 'r' saniyedir; \"tek\": true olan harekette 'kg' tek kolun ağırlığıdır. Önerecek bir değerin yoksa boş liste bırak.";
+const KURAL = "Her hareketin kimliği 'id' numarasıdır ve geçmiş kayıtlar id ile eşleşir. Mevcut bir hareketin id'sini değiştirme, başka bir harekete verme ve 'hareketler' listesinden hareket silme (programda kullanılmayan hareket listede kalabilir). Yeni bir hareket eklerken önce 'hareketler' listesine daha önce hiç kullanılmamış yeni bir id ile (en büyük id + 1) ekle, sonra günlerde o id ile kullan. Aynı hareket birden fazla günde yapılacaksa hepsinde aynı id'yi kullan. Günlerdeki 'ad' sadece okunurluk içindir ve listedeki adla aynı olmalıdır. Hareket adında parantez kullanma. Ağırlığın her kola ya da ele ayrı yüklendiği hareketlerde (dumbbell, kolları birbirinden bağımsız makineler) listede harekete \"tek\": true yaz; bu hareketlerde girilen kg tek kolun ağırlığıdır. Günlerdeki her hareketin 'not' alanı senin notun içindir: o hafta ya da o hareket için özel bir notun varsa (makine mi kablo mu, tempo, dikkat edilecek nokta, ağırlık önerisi vb.) oraya yaz, yoksa boş bırak.";
 function H(id, not){ const h = {id, set:3, tekrar:"8-12"}; if (not) h.not = not; return h; }
 const DEFAULT_PROGRAM = {hareketler:[
   {id:1,ad:"Shoulder press makinesi",kas:["Anterior deltoid","Lateral deltoid","Triceps brachii"]},
@@ -305,12 +305,6 @@ function setVal(g, h, i, field, v){
   a[i][field] = v;
   persist();
 }
-// yapay zekanın önerisi: henüz onaylanmamış setlere soluk (oto) olarak yazılır; onaylanana kadar sayılmaz, analize girmez
-function oneriKoy(g, h){ (h.oneri||[]).forEach((o,i)=>{
-  const L = Wm().logs, a = ((L[g.id] = L[g.id]||{})[h.id] = L[g.id][h.id]||[]);
-  while (a.length <= i) a.push({kg:"",r:""});
-  const t = a[i]; if (!t.oto && (t.kg || t.r)) return;
-  t.kg = t.kg || o.kg; t.r = t.r || o.r; if (t.kg || t.r) t.oto = 1; }); }
 function num(v){ const n = parseFloat(String(v==null?"":v).replace(",", ".")); return isFinite(n) ? n : null; }
 function filledCount(wk, g){ let c=0; for (const h of g.hareketler) for (const s of getSets(wk,g,h)) if (num(s.r)!=null && !s.oto) c++; return c; }
 function targetCount(g){ return g.hareketler.reduce((n,h)=>n+(h.set||3),0); }
@@ -389,7 +383,6 @@ function render(){
   if (!prog()) list.appendChild(bosHafta());
   else if (!g.hareketler.length) list.appendChild(el("p",{class:"msg",text:"Dinlenme günü. Yürüyüş gibi şeyleri aşağıdaki nota yazabilirsin."}));
   g.hareketler.forEach((h,hi)=>{
-    oneriKoy(g,h);
     const sets = getSets(wk,g,h), u = unit(h), e = ex(h);
     let last = sets.length; while (last>0 && num(sets[last-1].kg)==null && num(sets[last-1].r)==null) last--;
     const n = Math.max(h.set||3, last);
@@ -417,7 +410,7 @@ function render(){
           for (let j=i+1;j<count;j++){
             const t = a[j] || (a[j] = {kg:"",r:""});
             if (!t.oto && (t.kg || t.r)) break;
-            t[f] = a[i][f] || ((h.oneri||[])[j]||{})[f] || ""; if (t.kg || t.r) t.oto = 1; else delete t.oto;
+            t[f] = a[i][f]; if (t.kg || t.r) t.oto = 1; else delete t.oto;
           }
           persist(); for (let j=i;j<count;j++) paint(j, inp); renderTabs(); });
         // soluk değere dokunmak onaylamaz, sadece değiştirmek içindir: seçili gelir, yazılan yerine geçer
@@ -461,8 +454,7 @@ function render(){
 function bosHafta(){
   const src = yakinProg(key(week)), kids = [el("p",{text:"Bu haftanın programı belirlenmedi."})];
   if (src) { const b = el("button",{class:"btn primary",text:(src<key(week) ? "Önceki haftadan kopyala" : "Sonraki haftadan kopyala")+" ("+isoWeek(pKey(src))+". hafta)"});
-    b.addEventListener("click",()=>{ const p = kopya(prog(src)); p.gunler.forEach(d=>d.hareketler.forEach(h=>{ delete h.oneri; })); // öneriler o haftaya özel
-      Wm().program = p; if (dayIdx >= days().length) dayIdx = 0; persist(); render(); });
+    b.addEventListener("click",()=>{ Wm().program = kopya(prog(src)); if (dayIdx >= days().length) dayIdx = 0; persist(); render(); });
     kids.push(b); }
   const y = el("button",{class:"btn",text:"Yeni program ekle"});
   y.addEventListener("click",()=>{ progAc(); $("progText").focus(); $("progText").select(); });
@@ -595,12 +587,6 @@ function validate(p){
       used[id] = 1; delete h.ad; delete h.kas; delete h.birim;
       h.id = id; h.set = Math.max(1, Math.min(10, parseInt(h.set,10)||3)); h.tekrar = String(h.tekrar==null?"8-12":h.tekrar);
       const not = h.not==null ? "" : String(h.not).trim(); if (not) h.not = not; else delete h.not;
-      // öneri: set sayısına tamamlanır (eksikse son eleman tekrar eder, fazlası atılır)
-      const sayi = (v, ad) => { const t = String(v==null?"":v).trim(); if (t && !/^\d+([.,]\d+)?$/.test(t)) throw new Error(g.gun+" gününde \""+e.ad+"\" önerisinde "+ad+" tek sayı olmalı (\""+t+"\" yazılmış)."); return t.replace(",","."); };
-      const on = (h.oneri==null ? [] : [].concat(h.oneri)).map(s=>({kg:sayi(s&&s.kg,"kg"), r:sayi(s&&s.r,"tekrar")})).filter(s=>s.kg||s.r);
-      while (on.length && on.length<h.set) on.push(Object.assign({},on[on.length-1]));
-      on.length = Math.min(on.length,h.set);
-      if (on.length) h.oneri = on; else delete h.oneri;
     });
   });
   return p;
@@ -612,7 +598,7 @@ function progJSON(p){
   const row = (o,pad) => pad+JSON.stringify(o), adOf = id => (hs.find(e=>e.id===id)||{}).ad;
   return "{\n \"kural\": "+JSON.stringify(KURAL)+",\n \"hareketler\": [\n"+hs.map(e=>row(e,"  ")).join(",\n")+"\n ],\n \"gunler\": [\n"+
     gunler(p).map(g=>"  {\"id\":"+JSON.stringify(g.id)+", \"gun\":"+JSON.stringify(g.gun)+", \"baslik\":"+JSON.stringify(g.baslik||"")+", \"hareketler\": ["+
-      (g.hareketler.length ? "\n"+g.hareketler.map(h=>row(Object.assign({id:h.id, ad:adOf(h.id)}, h, {not:h.not||"", oneri:h.oneri||[]}),"   ")).join(",\n")+"\n  " : "")+"]}").join(",\n")+"\n ]\n}";
+      (g.hareketler.length ? "\n"+g.hareketler.map(h=>row(Object.assign({id:h.id, ad:adOf(h.id)}, h, {not:h.not||""}),"   ")).join(",\n")+"\n  " : "")+"]}").join(",\n")+"\n ]\n}";
 }
 let progOnay = null;
 // program yoksa kutuya en yakın haftanın programı gelir (yapay zekaya örnek olarak verilir); kaydedilince sadece bu haftaya yazılır
@@ -646,9 +632,7 @@ $("progSave").addEventListener("click",()=>{
   if (degisen.length && progOnay !== txt) { progOnay = txt; m.className="msg err";
     m.textContent = "Henüz kaydedilmedi. Şu id'lerin adı değişiyor: "+degisen.join("; ")+". Aynı hareketin yeni adıysa tekrar \"Programı kaydet\"e dokun; eski kayıtlar bu adla devam eder. Farklı bir hareketse ona yeni bir id ver."; return; }
   // program sadece açık olan haftaya yazılır
-  // onaylanmamış soluk setler temizlenir: yeni programın önerileri ve set sayıları geçerli olsun, onaylı setlere dokunulmaz
   progOnay = null; Wm().program = p;
-  Object.values(Wm().logs).forEach(d=>Object.values(d).forEach(a=>a.forEach(s=>{ if (s.oto) { s.kg = s.r = ""; delete s.oto; } })));
   if (dayIdx >= days().length) dayIdx = 0;
   persist(); render(); m.className="msg ok";
   m.textContent = "Program kaydedildi: sadece "+isoWeek(week)+". hafta için. Diğer haftalar değişmedi.";
