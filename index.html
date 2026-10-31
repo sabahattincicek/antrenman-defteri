@@ -313,20 +313,36 @@ function boyAt(wk){ if (W(wk).boy) return W(wk).boy;
   const ks = Object.keys(state.weeks).filter(k=>k<wk && state.weeks[k].boy).sort(); return ks.length ? state.weeks[ks[ks.length-1]].boy : ""; }
 function unit(h){ return ex(h).birim==="sn" ? "sn" : "tekrar"; }
 // tamamlanan setler metin olarak: "40 kg × 10" (otomatik gelen, dokunulmamış setler sayılmaz)
-function fmtArr(sets, h){ return sets.filter(s=>num(s.r)!=null && !s.oto).map(s=>(num(s.kg)!=null?num(s.kg)+" kg × ":"")+num(s.r)+(unit(h)==="sn"?" sn":"")); }
+function setMetin(sets, sn){ return sets.filter(s=>num(s.r)!=null && !s.oto).map(s=>(num(s.kg)!=null?num(s.kg)+" kg × ":"")+num(s.r)+(sn?" sn":"")); }
+function fmtArr(sets, h){ return setMetin(sets, unit(h)==="sn"); }
 function fmtSets(wk, g, h){ return fmtArr(getSets(wk,g,h), h); }
 // hareketin bu günden önceki en son seansı: hangi günde yapıldıysa (aynı haftanın daha erken bir günü de olabilir)
 function pKey(k){ const a = k.split("-"); return new Date(+a[0], a[1]-1, +a[2]); }
 function gunAdi(k){ return WEEK[(pKey(k).getDay()+6)%7][1]; }
+// kayıttaki gün id'sinin tarihi: gün, o haftanın kendi programından
+function gunKey(wk, ds, gid){ const x = ds.find(d=>d.id===gid), o = x ? wdOf(x) : (gid in WD ? WD[gid] : null);
+  return key(o==null ? pKey(wk) : addDays(pKey(wk),o)); }
 function lastDone(g, h){
   const cur = key(dayDate(g) || week); let best = null;
   Object.keys(state.weeks).forEach(wk=>{ if (wk > key(week)) return; const L = W(wk).logs||{}, ds = gunler(prog(wk)); // gün, o haftanın kendi programından
     Object.keys(L).forEach(gid=>{ const sets = fmtArr((L[gid]||{})[h.id]||[], h); if (!sets.length) return;
-      const x = ds.find(d=>d.id===gid), o = x ? wdOf(x) : (gid in WD ? WD[gid] : null);
-      const d = key(o==null ? pKey(wk) : addDays(pKey(wk),o));
+      const d = gunKey(wk,ds,gid);
       if (d < cur && (!best || d > best.d)) best = {d, sets}; }); });
   if (best) best.gun = gunAdi(best.d);
   return best;
+}
+// bir haftanın yapılan setleri, gün gün. Kayıtlardan okunur: hareket sonradan programdan çıkmışsa da görünür.
+// Ad ve birim o haftanın programından gelir (görüntülenen haftanın programı olmayabilir), yoksa katalogdan.
+function haftaSetleri(wk){
+  const p = prog(wk), ds = gunler(p), logs = W(wk).logs||{}, kat = katalog(), out = [];
+  Object.keys(logs).forEach(gid=>{
+    const L = logs[gid]||{}, g = ds.find(d=>d.id===gid), S = [];
+    new Set((g ? g.hareketler.map(h=>h.id) : []).concat(Object.keys(L).map(Number))).forEach(id=>{
+      const e = (p && p.hareketler.find(x=>x.id===id)) || kat.find(x=>x.id===id) || {ad:"?"}, sn = e.birim==="sn";
+      const h = g && g.hareketler.find(x=>x.id===id), sets = setMetin(L[id]||[], sn);
+      if (sets.length) S.push("- #"+id+" "+e.ad+(h ? " · hedef "+(h.set||3)+"x"+h.tekrar+(sn?" sn":"") : "")+(e.tek?" · kg tek kol başına":"")+": "+sets.join(" · ")); });
+    if (S.length) out.push({d:gunKey(wk,ds,gid), baslik:g ? g.baslik : "", S}); });
+  return out.sort((a,b)=>a.d<b.d ? -1 : 1);
 }
 
 // ---- çizim ----
@@ -459,7 +475,7 @@ const ANALIZ_PROMPT = [
 "",
 "2. Bölge ve kas analizi: Hangi vücut bölgesi (göğüs, sırt, omuz, kol, bacak, karın/bel) ve hangi kaslar bu hafta kaç set çalıştı? Bunu bir tablo ile göster. Hangi kaslar fazla, hangileri az ya da hiç çalışmadı? İtiş/çekiş ve üst/alt vücut dengesi nasıl? Haftalık set sayıları kas gelişimi için yeterli mi?",
 "",
-"3. Performans ve ilerleme: Hareket hareket ağırlık ve tekrarlara bak. Hedef tekrar aralığına ulaşılmış mı? Her hareketin \"Önceki\" kaydına (o hareketin bu günden önceki en son seansı; aynı hafta içinde başka bir gün de olabilir) göre ilerleme, yerinde sayma ya da gerileme var mı? Başındaki # numarası hareketin kimliğidir: aynı numara farklı günlerde geçiyorsa aynı harekettir, birlikte değerlendir. Setler arasında tekrar çok düşüyorsa belirt. Hangi harekette ağırlığı artırmalı, hangisinde aynı kalmalı ya da düşürmeliyim?",
+"3. Performans ve ilerleme: Hareket hareket ağırlık ve tekrarlara bak. Hedef tekrar aralığına ulaşılmış mı? Her hareketin \"Önceki\" kaydına (o hareketin bu günden önceki en son seansı; aynı hafta içinde başka bir gün de olabilir) göre ilerleme, yerinde sayma ya da gerileme var mı? Başındaki # numarası hareketin kimliğidir: aynı numara farklı günlerde geçiyorsa aynı harekettir, birlikte değerlendir. Setler arasında tekrar çok düşüyorsa belirt. Kayıttaki \"Önceki iki haftanın setleri ve tekrarları\" bölümüyle her hareketin üç haftalık gidişatını da değerlendir: ağırlık ve tekrar artıyor mu, kaç haftadır yerinde sayıyor, düşüş var mı? O bölüm yalnızca karşılaştırma içindir; haftanın özetinde ve set sayımlarında sadece analiz edilen haftayı say. Hangi harekette ağırlığı artırmalı, hangisinde aynı kalmalı ya da düşürmeliyim?",
 "",
 "4. Beslenme analizi: Yazdığım yemeklerden gün gün yaklaşık kalori ve protein, karbonhidrat, yağ miktarını tahmin et (tahmin olduğunu belirt). Boyuma, kiloma ve antrenman yüküme göre bu yeterli mi, az mı, fazla mı? Protein yeterli mi? Hangi besin grupları var, hangileri eksik (sebze, meyve, lif, sağlıklı yağ, su vb.)? Az yediysem ya da fazla yediysem açıkça söyle ve ne ekleyip ne çıkarmam gerektiğini somut yiyeceklerle yaz. Yemek yazılmamış günleri tahmin etme, sadece belirt.",
 "",
@@ -502,6 +518,10 @@ function buildExport(){
     L.push("", "--- Kas başına tamamlanan set (bu hafta) ---", "(ana: hareketin ilk yazılan kası, yardımcı: diğerleri)");
     ks.forEach(m=>L.push("- "+m+": "+(kas[m].ana+kas[m].yan)+" set ("+kas[m].ana+" ana, "+kas[m].yan+" yardımcı)"));
   }
+  L.push("", "--- Önceki iki haftanın setleri ve tekrarları ---", "(karşılaştırma için, eskiden yeniye; burada olmayan hareket o hafta kaydedilmemiştir)");
+  [-14,-7].forEach(n=>{ const w = addDays(week,n), k = key(w), gs = haftaSetleri(k);
+    L.push("", isoWeek(w)+". hafta ("+k+" – "+key(addDays(w,6))+")"+(gs.length ? "" : ": kayıt yok"));
+    gs.forEach(g=>{ L.push(gunAdi(g.d)+" "+g.d+(g.baslik ? " · "+g.baslik : "")); g.S.forEach(s=>L.push(s)); }); });
   const pn = (W(pk).not || "").trim();
   if (pn) L.push("", "--- Geçen haftanın yapay zeka notu ---", pn);
   L.push("", ANALIZ_PROMPT);
